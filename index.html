@@ -1,322 +1,372 @@
 <!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Web — @nnickkh social graph</title>
-<meta name="description" content="A measured map of Nicholas Halka's Instagram orbit: the 278 accounts that follow him back, who among them follows whom, when each friendship started, and 1.1M followers plotted month by month.">
+<title>The Web — the 278 people who follow Nicholas back</title>
+<meta name="description" content="Friends only. The 278 Instagram accounts that follow Nicholas Halka back, where in the world he was standing the day each one followed, which trip produced them, and which of them also follow each other.">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#07070b;--panel:#0f1018;--line:#1e2030;--txt:#e9ecf5;--dim:#8089a3;--acc:#4f9cff}
-body{background:var(--bg);color:var(--txt);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--txt);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 .wrap{max-width:1320px;margin:0 auto;padding:0 18px}
-header{padding:56px 0 18px;text-align:center}
+header{padding:54px 0 10px;text-align:center}
 h1{font-size:clamp(34px,7vw,66px);font-weight:800;letter-spacing:-.03em;line-height:1;
 background:linear-gradient(100deg,#4f9cff,#a855f7 40%,#f97316 75%,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{color:var(--dim);margin-top:13px;font-size:16.5px}.sub b{color:var(--txt)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:28px 0 16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 14px;text-align:center}
-.card .n{font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));gap:10px;margin:28px 0 10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 12px;text-align:center}
+.card .n{font-size:25px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .card .l{color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;margin-top:3px}
-
-.bar2{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px}
-.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:11px;overflow:hidden}
-.seg button{background:none;border:0;color:var(--dim);font:600 12.5px/1 inherit;padding:10px 14px;cursor:pointer;letter-spacing:.02em}
-.seg button.on{background:#1b2740;color:#cfe0ff}
-.seg button:hover{color:var(--txt)}
-input[type=search]{background:var(--panel);border:1px solid var(--line);border-radius:11px;color:var(--txt);
-padding:10px 13px;font:inherit;font-size:13px;min-width:220px;flex:1}
+h2{font-size:21px;font-weight:700;letter-spacing:-.02em;margin:0 0 3px}
+h2 small{display:block;color:var(--dim);font-size:13px;font-weight:400;letter-spacing:0;margin-top:4px}
+section{margin:44px 0}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 12px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;color:var(--dim);
+font:600 12px/1 inherit;padding:8px 12px;cursor:pointer;white-space:nowrap;transition:.12s}
+.chip:hover{color:var(--txt);border-color:#2e3550}
+.chip.on{background:#1b2740;color:#cfe0ff;border-color:#2c4063}
+.chip i{font-style:normal;opacity:.6;margin-left:5px;font-variant-numeric:tabular-nums}
+input[type=search]{background:var(--panel);border:1px solid var(--line);border-radius:999px;color:var(--txt);
+padding:9px 14px;font:inherit;font-size:13px;min-width:200px;flex:1;max-width:320px}
 input[type=search]:focus{outline:none;border-color:#2e3550}
-.clr{background:var(--panel);border:1px solid var(--line);border-radius:11px;color:var(--dim);
-font:600 12.5px/1 inherit;padding:10px 13px;cursor:pointer}.clr:hover{color:var(--txt)}
-
-.stage{display:grid;grid-template-columns:1fr 272px;gap:14px}
-@media(max-width:900px){.stage{grid-template-columns:1fr}}
-#graph{width:100%;height:72vh;min-height:520px;background:radial-gradient(ellipse at 50% 45%,#11131f 0%,#07070b 72%);
-border:1px solid var(--line);border-radius:18px;position:relative;overflow:hidden;cursor:grab}
-#graph:active{cursor:grabbing}#cv{display:block;width:100%;height:100%}
-.hint{position:absolute;left:15px;bottom:12px;color:#4b5268;font-size:11.5px;z-index:3;pointer-events:none}
-.side{display:flex;flex-direction:column;gap:12px}
-.pane{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
-.pane h3{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:700;margin-bottom:10px}
-.lg{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:8px;cursor:pointer;font-size:12.5px;color:var(--dim)}
-.lg:hover{background:#171a26;color:var(--txt)}.lg.on{background:#1b2740;color:#cfe0ff}
-.lg .dot{width:10px;height:10px;border-radius:50%;flex:none}
-.lg .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lg .ct{font-variant-numeric:tabular-nums;font-size:11.5px;color:#5f6880}
-#detail .big{font-size:17px;font-weight:700;letter-spacing:-.01em;word-break:break-all}
-#detail .fn{color:var(--dim);font-size:12.5px;margin-bottom:10px}
-#detail dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12.5px}
-#detail dt{color:#5f6880}#detail dd{text-align:right;font-variant-numeric:tabular-nums}
-#detail a.go{display:block;margin-top:12px;text-align:center;background:#1b2740;color:#cfe0ff;text-decoration:none;
-border-radius:10px;padding:9px;font-size:12.5px;font-weight:600}
-#detail a.go:hover{background:#24375c}
-.empty{color:#4d556b;font-size:12.5px}
-
-#tip{position:fixed;pointer-events:none;z-index:50;background:rgba(14,16,26,.96);border:1px solid #2a2d42;
-border-radius:11px;padding:9px 13px;font-size:13px;opacity:0;transition:opacity .1s;max-width:250px;box-shadow:0 10px 36px rgba(0,0,0,.6)}
-#tip .u{font-weight:700}#tip .m{color:var(--dim);font-size:11.5px;margin-top:3px}
-
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
-@media(max-width:860px){.cols{grid-template-columns:1fr}}
-.box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
-.box h2{font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:700}
-.box p.d{color:#5f6880;font-size:12.5px;margin:3px 0 14px}
-.yr{display:flex;align-items:flex-end;gap:5px;height:140px}
-.yc{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;cursor:pointer;height:100%}
-.yc i{display:block;width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,#4f9cff,#2b63b8);transition:.15s;min-height:2px}
-.yc:hover i{filter:brightness(1.35)}.yc.on i{background:linear-gradient(180deg,#f97316,#b4490c)}
-.yc b{font-size:10.5px;color:#5f6880;margin-top:6px;font-weight:600}
-.yc s{font-size:10.5px;color:var(--dim);text-decoration:none;margin-bottom:4px;font-variant-numeric:tabular-nums}
-.yc.on b,.yc.on s{color:#ffb074}
-#growth{width:100%;height:190px;display:block}
-.gread{display:flex;justify-content:space-between;color:#5f6880;font-size:11.5px;margin-top:6px;font-variant-numeric:tabular-nums}
-.row{display:flex;align-items:center;gap:11px;padding:6px 0}
-.row+.row{border-top:1px solid #171a26}
-.rank{width:18px;color:#525b74;font-size:12px;font-variant-numeric:tabular-nums;flex:none}
-.row a{color:var(--txt);text-decoration:none;font-weight:600;font-size:13px}
-.row a:hover{color:var(--acc)}.row .fn{color:#5f6880;font-size:11.5px}
-.bar{flex:1;height:5px;background:#171a26;border-radius:3px;overflow:hidden}
-.bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#4f9cff,#a855f7)}
-.val{color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums;width:34px;text-align:right;flex:none}
-.note{color:#4d556b;font-size:12.5px;text-align:center;padding:12px 0 60px;line-height:1.8}
-.note b{color:#7a8299}
+.stage{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+svg{display:block;width:100%}
+.legend{position:absolute;top:12px;left:12px;background:rgba(10,11,18,.9);border:1px solid var(--line);
+border-radius:12px;padding:11px 12px;font-size:11.5px;max-height:calc(100% - 24px);overflow:auto;backdrop-filter:blur(8px)}
+.legend b{display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+.lrow{display:flex;align-items:center;gap:7px;padding:2.5px 4px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.lrow:hover{background:#171a26}.lrow.on{background:#1b2740}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.lrow span{color:var(--dim);font-variant-numeric:tabular-nums;margin-left:auto;padding-left:10px}
+.detail{position:absolute;right:12px;bottom:12px;width:272px;background:rgba(10,11,18,.95);border:1px solid var(--line);
+border-radius:14px;padding:14px;font-size:12.5px;display:none;backdrop-filter:blur(8px)}
+.detail.on{display:block}
+.detail h3{font-size:15px;font-weight:700;margin-bottom:1px}
+.detail .u{color:var(--acc);font-size:12px;text-decoration:none}
+.detail .kv{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-top:1px solid var(--line);margin-top:6px;color:var(--dim)}
+.detail .kv b{color:var(--txt);font-weight:600;text-align:right}
+.hint{color:var(--dim);font-size:12px;margin-top:9px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}.legend{position:static;max-width:none;margin:12px;}.detail{position:static;width:auto;margin:12px}}
+.bars{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+.brow{display:grid;grid-template-columns:1fr 54px;gap:10px;align-items:center;padding:5px 7px;border-radius:9px;cursor:pointer}
+.brow:hover{background:#161926}.brow.on{background:#1b2740}
+.btrack{position:relative;height:22px;background:#13151f;border-radius:6px;overflow:hidden}
+.bfill{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#2a5fa8,#4f9cff);border-radius:6px}
+.blab{position:absolute;left:9px;top:0;line-height:22px;font-size:11.5px;white-space:nowrap;overflow:hidden;
+text-overflow:ellipsis;right:6px;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.bn{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;font-size:13px}
+.people{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.pill{background:#13151f;border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:11.5px;color:var(--dim);text-decoration:none}
+.pill:hover{color:var(--txt);border-color:#2e3550}
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.pair{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px}
+.pair a{color:var(--txt);text-decoration:none}.pair a:hover{color:var(--acc)}
+.pair em{font-style:normal;color:var(--dim);padding:0 6px}
+.tl{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px 16px 8px}
+footer{color:var(--dim);font-size:12.5px;text-align:center;padding:46px 0 60px;line-height:1.9}
+footer a{color:var(--acc);text-decoration:none}
+.tag{display:inline-block;background:#13151f;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:11px;color:var(--dim)}
 </style></head><body>
+
 <div class="wrap">
 <header>
 <h1>The Web</h1>
-<div class="sub"><b>278</b> people follow him back. This is what that actually looks like.</div>
+<p class="sub">Friends only. The <b id="s0">278</b> people who follow <b>@nnickkh</b> back, placed on the map
+<b>where he was standing</b> the day each one followed.</p>
 </header>
 
-<div class="stats" id="stats"></div>
-
-<div class="bar2">
-  <div class="seg" id="viewseg">
-    <button data-v="mut" class="on">Mutuals · 278</button>
-    <button data-v="all">Everyone he follows · 547</button>
-    <button data-v="one">One-way · 269</button>
-  </div>
-  <input type="search" id="q" placeholder="Search a name or @handle…" autocomplete="off">
-  <button class="clr" id="reset">Reset</button>
+<div class="stats">
+<div class="card"><div class="n" id="k1">278</div><div class="l">friends</div></div>
+<div class="card"><div class="n" id="k2">202</div><div class="l">placed on a map</div></div>
+<div class="card"><div class="n" id="k3">29</div><div class="l">countries</div></div>
+<div class="card"><div class="n" id="k4">25</div><div class="l">trips</div></div>
+<div class="card"><div class="n" id="k5">44</div><div class="l">met at sea</div></div>
+<div class="card"><div class="n" id="k6">54</div><div class="l">know each other</div></div>
+<div class="card"><div class="n" id="k7">176</div><div class="l">since jan 2025</div></div>
+<div class="card"><div class="n" id="k8">2012</div><div class="l">oldest friend</div></div>
 </div>
 
+<section>
+<h2>The constellation
+<small>Every node is a friend, grouped by the country he was in when they followed him. A line means those
+two people <b>follow each other</b>, not just him. Drag, scroll to zoom, click anyone.</small></h2>
+<div class="bar" id="yrbar"></div>
+<div class="bar"><input type="search" id="q" placeholder="search a name or handle…"><button class="chip" id="reset">clear filters</button><span class="hint" id="count"></span></div>
 <div class="stage">
-  <div id="graph"><canvas id="cv"></canvas>
-    <div class="hint">drag to pan · scroll to zoom · click a node for detail</div>
-  </div>
-  <div class="side">
-    <div class="pane"><h3>Circles</h3><div id="legend"></div></div>
-    <div class="pane" id="detail"><h3>Selected</h3><div class="empty">Click any node.</div></div>
-  </div>
+<svg id="g" height="620"></svg>
+<div class="legend" id="leg"></div>
+<div class="detail" id="det"></div>
+</div>
+</section>
+
+<section>
+<h2>Where he was standing when they followed
+<small>Bubble size is how many friendships started there. Click a country to pull it out of the web above.</small></h2>
+<div class="stage"><svg id="map" height="470"></svg><div class="detail" id="mdet"></div></div>
+<div class="people" id="mpeople"></div>
+</section>
+
+<div class="grid2">
+<section>
+<h2>Which trips actually made friends<small>Click a trip to filter the constellation.</small></h2>
+<div class="bars" id="tripbars"></div>
+</section>
+<section>
+<h2>When the friendships started<small>Monthly, 2012 to now. The last two years are not subtle.</small></h2>
+<div class="tl"><svg id="tl" height="250"></svg></div>
+<div class="bars" style="margin-top:16px" id="oldest"></div>
+</section>
 </div>
 
-<div class="cols">
-  <div class="box">
-    <h2>When they followed back</h2>
-    <p class="d">Exact dates from his own Instagram export. Click a year to filter the graph.</p>
-    <div class="yr" id="years"></div>
-  </div>
-  <div class="box">
-    <h2>1,103,885 followers, month by month</h2>
-    <p class="d">Every follower he has, placed on the month they arrived. Hover the chart.</p>
-    <svg id="growth"></svg>
-    <div class="gread"><span id="gl">—</span><span id="gr">—</span></div>
-  </div>
-</div>
+<section>
+<h2>Who knows who<small>The <b id="np">54</b> pairs inside his orbit who follow each other in both directions.</small></h2>
+<div class="pairs" id="pairs"></div>
+</section>
 
-<div class="cols">
-  <div class="box"><h2>Most connected</h2><p class="d">Followed by the most other people inside his orbit.</p><div id="topconn"></div></div>
-  <div class="box"><h2>Oldest friendships</h2><p class="d">The accounts that followed him back first.</p><div id="oldest"></div></div>
-</div>
-
-<div class="note">
-Follow-back status and dates come from Nicholas's own Instagram data export — authoritative, not inferred.<br>
-The edges between other people were crawled and are a <b>lower bound</b>: private accounts show nothing.<br>
+<footer>
+Mutual status and follow dates come from Nicholas's own Instagram data export, not from scraping.<br>
+Friend-to-friend links are only drawn where both following lists are readable — <span class="tag" id="covnote"></span><br>
+Travel positions are matched against <a href="https://travel.aeroverra.com">travel.aeroverra.com</a> day by day.<br>
 Built by Azula.
+</footer>
 </div>
-</div>
-<div id="tip"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 <script>
-const COL=['#4f9cff','#a855f7','#f97316','#22c55e','#ef4444','#06b6d4','#eab308','#ec4899','#14b8a6','#8b5cf6'];
-const OUTER='#4a5366', ME='#ffffff';
-const fmt=n=>n.toLocaleString();
-let D,G,state={view:'mut',cluster:null,year:null,q:''},sel=null,hov=null;
+const ME='222397560';
+Promise.all([d3.json('data3.json'),d3.json('cc.json'),
+  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')]).then(([D,CC,WORLD])=>{
 
-Promise.all([d3.json('data2.json'),d3.json('growth.json').catch(()=>null)]).then(([d,g])=>{
-  D=d;G=g;
-  const s=d.stats;
-  d3.select('#stats').html([
-    ['Follows back',fmt(s.mutual)],['He follows',fmt(s.following)],['One-way',fmt(s.oneway)],
-    ['Followers',(s.followers/1e6).toFixed(2)+'M'],['Links mapped',fmt(s.edges)],['Circles',s.communities]
-  ].map(([l,n])=>`<div class="card"><div class="n">${n}</div><div class="l">${l}</div></div>`).join(''));
+const nodes=D.nodes.map(d=>({...d})), me=nodes.find(n=>n.id===ME);
+const byId=new Map(nodes.map(n=>[n.id,n]));
+const links=D.links.map(l=>({source:l.s,target:l.t}));
+const friends=nodes.filter(n=>n.id!==ME);
 
-  drawLegend(); drawYears(); drawGrowth(); drawLists(); initGraph(); apply();
+// ---------- palette by country ----------
+const ccOrder=D.cc.map(d=>d[0]);
+const pal=['#4f9cff','#a855f7','#f97316','#22c55e','#ef4444','#06b6d4','#eab308','#ec4899',
+           '#8b5cf6','#14b8a6','#f43f5e','#84cc16','#0ea5e9','#d946ef','#fb923c','#34d399'];
+const color=cc=>{const i=ccOrder.indexOf(cc);return i<0?'#5a6176':pal[i%pal.length];};
+const place=n=>n.cc?(CC[n.cc]?CC[n.cc][0]:n.cc):(n.kind==='sea'?'At sea · '+(n.loc||''):null);
 
-  d3.selectAll('#viewseg button').on('click',function(){
-    d3.selectAll('#viewseg button').classed('on',false);d3.select(this).classed('on',true);
-    state.view=this.dataset.v;apply();});
-  d3.select('#q').on('input',function(){state.q=this.value.trim().toLowerCase();apply();});
-  d3.select('#reset').on('click',()=>{state={view:'mut',cluster:null,year:null,q:''};sel=null;
-    d3.select('#q').property('value','');
-    d3.selectAll('#viewseg button').classed('on',(_,i,n)=>n[i].dataset.v==='mut');
-    drawLegend();drawYears();detail(null);apply();});
+// ---------- stats ----------
+const sea=friends.filter(n=>n.kind==='sea').length;
+const recent=friends.filter(n=>n.yr>=2025).length;
+const oldestYr=d3.min(friends.filter(n=>n.yr),n=>n.yr);
+d3.select('#k1').text(D.stats.mutuals);d3.select('#k2').text(D.stats.located);
+d3.select('#k3').text(D.stats.countries);d3.select('#k4').text(D.stats.trips);
+d3.select('#k5').text(sea);d3.select('#k6').text(D.links.length);
+d3.select('#k7').text(recent);d3.select('#k8').text(oldestYr);
+d3.select('#np').text(D.links.length);
+d3.select('#covnote').text(D.stats.covered+' of '+D.stats.mutuals+' friends have a public following list');
+
+// ---------- shared filter ----------
+const F={yr:null,cc:null,trip:null,q:''};
+const pass=n=>{
+  if(n.id===ME)return true;
+  if(F.yr&&n.yr!==F.yr)return false;
+  if(F.cc&&(F.cc==='SEA'?n.kind!=='sea':n.cc!==F.cc))return false;
+  if(F.trip&&n.trip!==F.trip)return false;
+  if(F.q){const s=(n.un+' '+(n.full||'')+' '+(n.loc||'')).toLowerCase();if(!s.includes(F.q))return false;}
+  return true;
+};
+
+// ---------- year chips ----------
+const yrbar=d3.select('#yrbar');
+yrbar.append('button').attr('class','chip on').attr('data-y','').text('all years')
+  .on('click',()=>{F.yr=null;redraw();});
+D.yrs.slice().reverse().forEach(([y,n])=>{
+  yrbar.append('button').attr('class','chip').attr('data-y',y)
+    .html(y+' <i>'+n+'</i>').on('click',()=>{F.yr=F.yr===y?null:y;redraw();});
+});
+d3.select('#reset').on('click',()=>{F.yr=F.cc=F.trip=null;F.q='';d3.select('#q').property('value','');redraw();});
+d3.select('#q').on('input',function(){F.q=this.value.trim().toLowerCase();redraw();});
+
+// ---------- force graph ----------
+const svg=d3.select('#g'), W=()=>svg.node().clientWidth, H=620;
+const root=svg.append('g');
+svg.call(d3.zoom().scaleExtent([.4,4]).on('zoom',e=>root.attr('transform',e.transform)));
+const lg=root.append('g').attr('stroke','#38507a').attr('stroke-opacity',.9),
+      ng=root.append('g');
+lg.attr('stroke','#38507a');
+
+// cluster anchors: one ring position per country bucket
+const buckets=[...new Set(friends.map(n=>n.cc||(n.kind==='sea'?'SEA':'ZZ')))];
+const bOrder=buckets.sort((a,b)=>{
+  const ca=friends.filter(n=>(n.cc||(n.kind==='sea'?'SEA':'ZZ'))===a).length;
+  const cb=friends.filter(n=>(n.cc||(n.kind==='sea'?'SEA':'ZZ'))===b).length;return cb-ca;});
+const anchor=new Map();
+bOrder.forEach((b,i)=>{const a=(i/bOrder.length)*2*Math.PI, r=i===0?120:150+((i%4)*52);
+  anchor.set(b,[Math.cos(a)*r,Math.sin(a)*r]);});
+const bkt=n=>n.cc||(n.kind==='sea'?'SEA':'ZZ');
+
+const link=lg.selectAll('line').data(links).join('line').attr('stroke-width',1.3);
+const node=ng.selectAll('g').data(friends.concat([me]),d=>d.id).join('g').style('cursor','pointer');
+node.append('circle')
+  .attr('r',d=>d.id===ME?16:4.5+Math.min(d.deg,8)*1.3)
+  .attr('fill',d=>d.id===ME?'#fff':color(d.cc))
+  .attr('fill-opacity',d=>d.id===ME?1:(d.cov?.92:.5))
+  .attr('stroke',d=>d.id===ME?'#4f9cff':'#0b0c12').attr('stroke-width',d=>d.id===ME?3:1.1);
+node.append('text').text(d=>d.id===ME?'Nicholas':'')
+  .attr('x',21).attr('y',5).attr('fill','#fff').attr('font-size',13).attr('font-weight',700);
+node.append('title').text(d=>'@'+d.un+(place(d)?' · '+place(d):'')+(d.d?' · '+d.d:''));
+
+const sim=d3.forceSimulation(friends.concat([me]))
+  .force('link',d3.forceLink(links).id(d=>d.id).distance(46).strength(.55))
+  .force('charge',d3.forceManyBody().strength(d=>d.id===ME?-900:-42))
+  .force('x',d3.forceX(d=>d.id===ME?0:anchor.get(bkt(d))[0]).strength(.22))
+  .force('y',d3.forceY(d=>d.id===ME?0:anchor.get(bkt(d))[1]).strength(.22))
+  .force('col',d3.forceCollide(d=>d.id===ME?22:11))
+  .on('tick',()=>{
+    link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
+        .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+    node.attr('transform',d=>`translate(${d.x},${d.y})`);
+  });
+root.attr('transform',`translate(${W()/2},${H/2})`);
+setTimeout(()=>root.attr('transform',`translate(${W()/2},${H/2})`),50);
+node.call(d3.drag()
+  .on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;})
+  .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y;})
+  .on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=d.fy=null;}));
+
+// ---------- detail card ----------
+const det=d3.select('#det');
+const neighbours=id=>D.links.filter(l=>l.s===id||l.t===id).map(l=>l.s===id?l.t:l.s);
+node.on('click',(e,d)=>{
+  if(d.id===ME){det.classed('on',false);return;}
+  const nb=neighbours(d.id).map(x=>byId.get(x)).filter(Boolean);
+  det.classed('on',true).html(
+    `<h3>${d.full||d.un}</h3><a class="u" href="https://instagram.com/${d.un}" target="_blank" rel="noopener">@${d.un}</a>`+
+    `<div class="kv">followed back<b>${d.d||'—'}</b></div>`+
+    (place(d)?`<div class="kv">he was in<b>${d.loc||''}${d.cc?' · '+CC[d.cc][0]:''}</b></div>`:'')+
+    (d.trip?`<div class="kv">during<b style="max-width:150px">${d.trip}</b></div>`:'')+
+    `<div class="kv">mutual friends here<b>${nb.length}</b></div>`+
+    (nb.length?`<div class="people">${nb.map(x=>`<a class="pill" href="https://instagram.com/${x.un}" target="_blank" rel="noopener">@${x.un}</a>`).join('')}</div>`:'')
+  );
+});
+svg.on('click',e=>{if(e.target.tagName==='svg')det.classed('on',false);});
+
+// ---------- legend (countries) ----------
+const legRows=[...D.cc];
+if(sea)legRows.unshift(['SEA',sea]);
+const leg=d3.select('#leg');
+leg.append('b').text('where they followed');
+legRows.forEach(([cc,n])=>{
+  const r=leg.append('div').attr('class','lrow').attr('data-cc',cc)
+   .on('click',()=>{F.cc=F.cc===cc?null:cc;redraw();});
+  r.append('div').attr('class','dot').style('background',cc==='SEA'?'#5a6176':color(cc));
+  r.append('div').text(cc==='SEA'?'At sea':(CC[cc]?CC[cc][0]:cc));
+  r.append('span').text(n);
 });
 
-function visible(n){
-  if(n.me) return true;
-  if(state.view==='mut'&&!n.fb) return false;
-  if(state.view==='one'&&n.fb) return false;
-  if(state.cluster!==null&&n.c!==state.cluster) return false;
-  if(state.year!==null&&n.yr!==state.year) return false;
-  if(state.q&&!(n.un.toLowerCase().includes(state.q)||(n.full||'').toLowerCase().includes(state.q))) return false;
-  return true;
+// ---------- world map ----------
+const msvg=d3.select('#map'), MW=()=>msvg.node().clientWidth, MH=470;
+const land=topojson.feature(WORLD,WORLD.objects.countries);
+const proj=d3.geoNaturalEarth1(), path=d3.geoPath(proj);
+const mg=msvg.append('g'), bub=msvg.append('g');
+function drawMap(){
+  proj.fitExtent([[10,10],[MW()-10,MH-10]],land);
+  mg.selectAll('path').data(land.features).join('path').attr('d',path)
+    .attr('fill','#141725').attr('stroke','#1f2334').attr('stroke-width',.6);
+  const data=D.cc.map(([cc,n])=>({cc,n,p:proj([CC[cc][2],CC[cc][1]])})).filter(d=>d.p);
+  const R=d3.scaleSqrt().domain([1,d3.max(data,d=>d.n)]).range([4.5,27]);
+  const g=bub.selectAll('g').data(data).join('g')
+    .attr('transform',d=>`translate(${d.p[0]},${d.p[1]})`).style('cursor','pointer')
+    .on('click',(e,d)=>{F.cc=F.cc===d.cc?null:d.cc;redraw();});
+  g.selectAll('circle').data(d=>[d]).join('circle').attr('r',d=>R(d.n))
+    .attr('fill',d=>color(d.cc)).attr('fill-opacity',.42)
+    .attr('stroke',d=>color(d.cc)).attr('stroke-width',1.6);
+  g.selectAll('text').data(d=>[d]).join('text').text(d=>d.n)
+    .attr('text-anchor','middle').attr('dy',4).attr('fill','#fff')
+    .attr('font-size',d=>Math.max(9,Math.min(13,R(d.n)*.8))).attr('font-weight',700)
+    .style('pointer-events','none');
+  g.selectAll('title').data(d=>[d]).join('title').text(d=>CC[d.cc][0]+' — '+d.n+' friendships started here');
 }
-function colorOf(n){return n.me?ME:(n.c>=0?COL[n.c%COL.length]:OUTER);}
+drawMap();
 
-/* ---------- legend ---------- */
-function drawLegend(){
-  const rows=D.communities.map(c=>`<div class="lg ${state.cluster===c.c?'on':''}" data-c="${c.c}">
-    <span class="dot" style="background:${COL[c.c%COL.length]}"></span>
-    <span class="nm">${c.lead}'s circle</span><span class="ct">${c.nmut}/${c.n}</span></div>`).join('')
-   +`<div class="lg ${state.cluster===-2?'on':''}" data-c="-2">
-     <span class="dot" style="background:${OUTER}"></span><span class="nm">No mapped links</span>
-     <span class="ct">${D.nodes.filter(n=>n.c<0&&!n.me&&n.fb).length}/${D.nodes.filter(n=>n.c<0&&!n.me).length}</span></div>`;
-  d3.select('#legend').html(rows);
-  d3.selectAll('.lg').on('click',function(){
-    const c=+this.dataset.c;state.cluster=state.cluster===c?null:c;drawLegend();apply();});
+// ---------- trips ----------
+const tb=d3.select('#tripbars'), tmax=D.trips[0][1];
+D.trips.forEach(([name,n])=>{
+  const r=tb.append('div').attr('class','brow').attr('data-trip',name)
+    .on('click',()=>{F.trip=F.trip===name?null:name;redraw();});
+  const t=r.append('div').attr('class','btrack');
+  t.append('div').attr('class','bfill').style('width',(n/tmax*100)+'%');
+  t.append('div').attr('class','blab').text(name);
+  r.append('div').attr('class','bn').text(n);
+});
+
+// ---------- monthly timeline ----------
+const tsvg=d3.select('#tl'), TW=()=>tsvg.node().clientWidth, TH=250;
+function drawTl(){
+  tsvg.selectAll('*').remove();
+  const m=D.mon, x=d3.scaleBand().domain(m.map(d=>d[0])).range([34,TW()-8]).padding(.12);
+  const y=d3.scaleLinear().domain([0,d3.max(m,d=>d[1])]).nice().range([TH-24,10]);
+  tsvg.append('g').attr('transform',`translate(0,${TH-24})`)
+    .call(d3.axisBottom(x).tickValues(m.map(d=>d[0]).filter(s=>s.endsWith('-01')))
+      .tickFormat(s=>s.slice(0,4)))
+    .call(g=>{g.select('.domain').attr('stroke','#1f2334');
+      g.selectAll('text').attr('fill','#8089a3').attr('font-size',10);
+      g.selectAll('line').attr('stroke','#1f2334');});
+  tsvg.append('g').attr('transform','translate(34,0)')
+    .call(d3.axisLeft(y).ticks(4))
+    .call(g=>{g.select('.domain').remove();
+      g.selectAll('text').attr('fill','#8089a3').attr('font-size',10);
+      g.selectAll('line').attr('stroke','#1f2334');});
+  tsvg.append('g').selectAll('rect').data(m).join('rect')
+    .attr('x',d=>x(d[0])).attr('width',Math.max(1.5,x.bandwidth()))
+    .attr('y',d=>y(d[1])).attr('height',d=>TH-24-y(d[1]))
+    .attr('fill',d=>+d[0].slice(0,4)>=2025?'#4f9cff':'#2f3a55')
+    .attr('rx',1).style('cursor','pointer')
+    .on('click',(e,d)=>{const yr=+d[0].slice(0,4);F.yr=F.yr===yr?null:yr;redraw();})
+    .append('title').text(d=>d[0]+' — '+d[1]+(d[1]===1?' friendship':' friendships'));
 }
-/* ---------- years ---------- */
-function drawYears(){
-  const mx=d3.max(D.years,y=>y.n);
-  d3.select('#years').html(D.years.map(y=>`<div class="yc ${state.year===y.y?'on':''}" data-y="${y.y}">
-    <s>${y.n}</s><i style="height:${Math.max(3,y.n/mx*100)}%"></i><b>'${String(y.y).slice(2)}</b></div>`).join(''));
-  d3.selectAll('.yc').on('click',function(){
-    const y=+this.dataset.y;state.year=state.year===y?null:y;drawYears();apply();});
+drawTl();
+
+// ---------- oldest friends ----------
+const ob=d3.select('#oldest');
+ob.append('div').style('color','#8089a3').style('font-size','11px')
+  .style('letter-spacing','.09em').style('text-transform','uppercase')
+  .style('margin','2px 0 8px 6px').text('longest-standing friendships');
+friends.filter(d=>d.d).sort((a,b)=>a.d.localeCompare(b.d)).slice(0,8).forEach(d=>{
+  const r=ob.append('div').attr('class','brow').style('grid-template-columns','1fr 92px');
+  r.append('div').style('font-size','13px').html(`<b>@${d.un}</b> <span style="color:#8089a3">${(d.full||'').slice(0,26)}</span>`);
+  r.append('div').attr('class','bn').style('font-size','12px').style('color','#8089a3').text(d.d);
+});
+
+// ---------- who knows who ----------
+const pw=d3.select('#pairs');
+D.links.map(l=>[byId.get(l.s),byId.get(l.t)]).filter(p=>p[0]&&p[1])
+ .sort((a,b)=>(b[0].deg+b[1].deg)-(a[0].deg+a[1].deg))
+ .forEach(([a,b])=>{
+  pw.append('div').attr('class','pair').html(
+   `<a href="https://instagram.com/${a.un}" target="_blank" rel="noopener">@${a.un}</a><em>↔</em><a href="https://instagram.com/${b.un}" target="_blank" rel="noopener">@${b.un}</a>`);
+});
+
+// ---------- redraw ----------
+const mpeople=d3.select('#mpeople');
+function redraw(){
+  const vis=new Set(friends.filter(pass).map(n=>n.id));
+  node.style('display',d=>d.id===ME||vis.has(d.id)?null:'none')
+      .select('circle').attr('fill-opacity',d=>d.id===ME?1:(d.cov?.92:.5));
+  link.style('display',d=>vis.has(d.source.id)&&vis.has(d.target.id)?null:'none');
+  d3.selectAll('#yrbar .chip').classed('on',function(){
+    const v=this.getAttribute('data-y');return F.yr?v==String(F.yr):v==='';});
+  d3.selectAll('.lrow').classed('on',function(){return F.cc===this.getAttribute('data-cc');});
+  d3.selectAll('.brow[data-trip]').classed('on',function(){return F.trip===this.getAttribute('data-trip');});
+  const bits=[];
+  if(F.yr)bits.push(F.yr);
+  if(F.cc)bits.push(F.cc==='SEA'?'at sea':CC[F.cc][0]);
+  if(F.trip)bits.push(F.trip.slice(0,34));
+  if(F.q)bits.push('"'+F.q+'"');
+  d3.select('#count').text(vis.size+' of '+friends.length+' friends'+(bits.length?' · '+bits.join(' · '):''));
+  const list=friends.filter(pass).sort((a,b)=>(a.d||'').localeCompare(b.d||''));
+  mpeople.html(bits.length?list.map(n=>
+    `<a class="pill" href="https://instagram.com/${n.un}" target="_blank" rel="noopener">@${n.un}${n.loc?' · '+n.loc:''}</a>`).join(''):'');
+  sim.alpha(.25).restart();
 }
-/* ---------- growth ---------- */
-function drawGrowth(){
-  if(!G){d3.select('#growth').remove();return;}
-  const svg=d3.select('#growth'),W=svg.node().clientWidth||600,H=190;
-  svg.attr('viewBox',`0 0 ${W} ${H}`);
-  const s=G.series,x=d3.scalePoint().domain(s.map(d=>d.m)).range([0,W]),
-        y=d3.scaleSqrt().domain([0,d3.max(s,d=>d.n)]).range([H-18,6]);
-  const area=d3.area().x(d=>x(d.m)).y0(H-18).y1(d=>y(d.n)).curve(d3.curveMonotoneX);
-  const line=d3.line().x(d=>x(d.m)).y(d=>y(d.n)).curve(d3.curveMonotoneX);
-  const gd=svg.append('defs').append('linearGradient').attr('id','gg').attr('x1',0).attr('y1',0).attr('x2',0).attr('y2',1);
-  gd.append('stop').attr('offset','0%').attr('stop-color','#4f9cff').attr('stop-opacity',.55);
-  gd.append('stop').attr('offset','100%').attr('stop-color','#4f9cff').attr('stop-opacity',0);
-  svg.append('path').datum(s).attr('d',area).attr('fill','url(#gg)');
-  svg.append('path').datum(s).attr('d',line).attr('fill','none').attr('stroke','#4f9cff').attr('stroke-width',1.6);
-  const mk=svg.append('circle').attr('r',3.5).attr('fill','#fff').attr('opacity',0);
-  const rule=svg.append('line').attr('y1',0).attr('y2',H-18).attr('stroke','#2a2d42').attr('opacity',0);
-  s.filter(d=>d.m.endsWith('-01')).forEach(d=>svg.append('text').attr('x',x(d.m)).attr('y',H-4)
-    .attr('fill','#4b5268').attr('font-size',9.5).attr('text-anchor','middle').text(d.m.slice(0,4)));
-  svg.on('mousemove',function(e){
-    const mx=d3.pointer(e,this)[0]*(W/this.getBoundingClientRect().width);
-    let best=s[0],bd=1e9;s.forEach(d=>{const dd=Math.abs(x(d.m)-mx);if(dd<bd){bd=dd;best=d;}});
-    mk.attr('cx',x(best.m)).attr('cy',y(best.n)).attr('opacity',1);
-    rule.attr('x1',x(best.m)).attr('x2',x(best.m)).attr('opacity',1);
-    d3.select('#gl').text(best.m+' · +'+fmt(best.n));
-    d3.select('#gr').text('total '+fmt(best.cum));
-  }).on('mouseleave',()=>{mk.attr('opacity',0);rule.attr('opacity',0);
-    d3.select('#gl').text('—');d3.select('#gr').text('—');});
-  const last=s[s.length-1];d3.select('#gl').text(last.m+' · +'+fmt(last.n));d3.select('#gr').text('total '+fmt(last.cum));
-}
-/* ---------- lists ---------- */
-function drawLists(){
-  const row=(i,n,v,mx)=>`<div class="row"><span class="rank">${i+1}</span>
-    <a href="https://instagram.com/${n.un}" target="_blank" rel="noopener">@${n.un}</a>
-    <span class="fn">${(n.full||'').slice(0,20)}</span>
-    <span class="bar"><i style="width:${v/mx*100}%"></i></span><span class="val">${v}</span></div>`;
-  const conn=D.nodes.filter(n=>!n.me&&n.fb).sort((a,b)=>b.deg-a.deg).slice(0,10);
-  d3.select('#topconn').html(conn.map((n,i)=>row(i,n,n.deg,conn[0].deg||1)).join(''));
-  const old=D.nodes.filter(n=>n.fb&&n.ts).sort((a,b)=>a.ts-b.ts).slice(0,10);
-  d3.select('#oldest').html(old.map((n,i)=>`<div class="row"><span class="rank">${i+1}</span>
-    <a href="https://instagram.com/${n.un}" target="_blank" rel="noopener">@${n.un}</a>
-    <span class="fn">${(n.full||'').slice(0,18)}</span>
-    <span class="bar"></span><span class="val" style="width:62px">${new Date(n.ts*1e3).toLocaleDateString('en',{month:'short',year:'numeric'})}</span></div>`).join(''));
-}
-/* ---------- graph ---------- */
-let cv,ctx,sim,W,H,tf=d3.zoomIdentity,nodes=[],links=[];
-function initGraph(){
-  cv=document.getElementById('cv');ctx=cv.getContext('2d');
-  size();window.addEventListener('resize',()=>{size();sim&&sim.alpha(.3).restart();});
-  sim=d3.forceSimulation()
-    .force('link',d3.forceLink().id(d=>d.id).distance(l=>(l.source.me||l.target.me)?70:46).strength(.25))
-    .force('charge',d3.forceManyBody().strength(-120))
-    .force('x',d3.forceX(0).strength(.055)).force('y',d3.forceY(0).strength(.065))
-    .force('collide',d3.forceCollide(d=>rad(d)+5))
-    .on('tick',draw);
-  d3.select(cv).call(d3.zoom().scaleExtent([.25,6]).on('zoom',e=>{tf=e.transform;draw();}))
-    .on('mousemove',onMove).on('click',onClick).on('mouseleave',()=>{hov=null;d3.select('#tip').style('opacity',0);draw();});
-}
-function size(){const r=document.getElementById('graph').getBoundingClientRect();
-  W=r.width;H=r.height;const dpr=window.devicePixelRatio||1;
-  cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
-function rad(n){return n.me?13:3.4+Math.sqrt(n.deg)*2.1;}
-function apply(){
-  const vis=D.nodes.filter(visible);
-  const ids=new Set(vis.map(n=>n.id));
-  const prev=new Map(nodes.map(n=>[n.id,n]));
-  nodes=vis.map(n=>Object.assign(prev.get(n.id)||{},n));
-  links=D.links.filter(l=>ids.has(l.s)&&ids.has(l.t)).map(l=>({source:l.s,target:l.t}));
-  D.nodes.forEach(n=>{if(n.me)return;});
-  // tether every visible node to Nicholas so nothing floats off
-  nodes.filter(n=>!n.me).forEach(n=>links.push({source:'222397560',target:n.id,me:1}));
-  sim.nodes(nodes);sim.force('link').links(links);
-  sim.alpha(.85).restart();
-  d3.select('#graph .hint').text(`${nodes.length-1} shown · drag to pan · scroll to zoom · click a node`);
-}
-function draw(){
-  ctx.clearRect(0,0,W,H);ctx.save();
-  ctx.translate(W/2+tf.x,H/2+tf.y);ctx.scale(tf.k,tf.k);
-  ctx.lineWidth=.7;
-  links.forEach(l=>{
-    if(l.me){ctx.strokeStyle='rgba(120,132,170,.085)';}
-    else{ctx.strokeStyle=sel&&(l.source.id===sel.id||l.target.id===sel.id)?'rgba(79,156,255,.75)':'rgba(120,132,170,.3)';}
-    ctx.beginPath();ctx.moveTo(l.source.x,l.source.y);ctx.lineTo(l.target.x,l.target.y);ctx.stroke();});
-  nodes.forEach(n=>{
-    const r=rad(n),c=colorOf(n),on=(sel&&sel.id===n.id)||(hov&&hov.id===n.id);
-    ctx.beginPath();ctx.arc(n.x,n.y,r,0,6.2832);
-    if(n.fb||n.me){ctx.fillStyle=c;ctx.globalAlpha=on?1:.92;ctx.fill();}
-    else{ctx.fillStyle='#0b0d14';ctx.globalAlpha=1;ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=1.4;ctx.stroke();}
-    ctx.globalAlpha=1;
-    if(on){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();}
-    if(n.ver&&!n.me){ctx.fillStyle='#0b0d14';ctx.beginPath();ctx.arc(n.x+r*.78,n.y-r*.78,2.2,0,6.2832);ctx.fill();
-      ctx.fillStyle='#4f9cff';ctx.beginPath();ctx.arc(n.x+r*.78,n.y-r*.78,1.5,0,6.2832);ctx.fill();}
-  });
-  const lim=nodes.length<60?1:(nodes.length<160?2:(nodes.length<340?3:4));
-  ctx.textAlign='center';ctx.textBaseline='top';
-  nodes.forEach(n=>{
-    const on=(sel&&sel.id===n.id)||(hov&&hov.id===n.id);
-    if(!on&&!n.me&&n.deg<lim)return;
-    ctx.font=`${n.me?700:600} ${(n.me?12:10.5)/Math.max(1,tf.k*.62)}px -apple-system,Segoe UI,sans-serif`;
-    ctx.fillStyle=n.me?'#fff':(on?'#fff':'rgba(200,209,230,.72)');
-    ctx.fillText(n.me?'Nicholas':'@'+n.un,n.x,n.y+rad(n)+3);});
-  ctx.restore();
-}
-function pick(e){const[mx,my]=d3.pointer(e,cv);
-  const x=(mx-W/2-tf.x)/tf.k,y=(my-H/2-tf.y)/tf.k;
-  let best=null,bd=1e9;nodes.forEach(n=>{const d=Math.hypot(n.x-x,n.y-y);if(d<bd&&d<rad(n)+6){bd=d;best=n;}});return best;}
-function onMove(e){const n=pick(e);hov=n;const t=d3.select('#tip');
-  if(n){t.style('opacity',1).style('left',(e.clientX+14)+'px').style('top',(e.clientY+14)+'px')
-    .html(`<div class="u">${n.me?'Nicholas Halka':'@'+n.un}</div><div class="m">${n.me?'@nnickkh':
-    [(n.full||''),n.fb?'follows back':'does not follow back',n.yr?'since '+n.yr:''].filter(Boolean).join(' · ')}</div>`);
-    cv.style.cursor='pointer';}
-  else{t.style('opacity',0);cv.style.cursor='grab';}
-  draw();}
-function onClick(e){const n=pick(e);sel=n&&!n.me?n:null;detail(sel);draw();}
-function detail(n){
-  const el=d3.select('#detail');
-  if(!n){el.html('<h3>Selected</h3><div class="empty">Click any node.</div>');return;}
-  const c=D.communities.find(c=>c.c===n.c);
-  el.html(`<h3>Selected</h3><div class="big">@${n.un}${n.ver?' ✓':''}</div>
-  <div class="fn">${n.full||'—'}</div>
-  <dl><dt>Follows back</dt><dd>${n.fb?'yes':'no'}</dd>
-  <dt>Since</dt><dd>${n.ts?new Date(n.ts*1e3).toLocaleDateString('en',{month:'short',year:'numeric'}):'—'}</dd>
-  <dt>Circle</dt><dd>${c?c.lead:'unmapped'}</dd>
-  <dt>Followed by</dt><dd>${n.deg} here</dd></dl>
-  <a class="go" href="https://instagram.com/${n.un}" target="_blank" rel="noopener">Open profile →</a>`);
-}
+redraw();
+window.addEventListener('resize',()=>{drawMap();drawTl();root.attr('transform',`translate(${W()/2},${H/2})`);});
+});
 </script>
 </body></html>
