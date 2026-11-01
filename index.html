@@ -147,7 +147,9 @@ const friends=nodes.filter(n=>n.id!==ME);
 const ccOrder=D.cc.map(d=>d[0]);
 const pal=['#4f9cff','#a855f7','#f97316','#22c55e','#ef4444','#06b6d4','#eab308','#ec4899',
            '#8b5cf6','#14b8a6','#f43f5e','#84cc16','#0ea5e9','#d946ef','#fb923c','#34d399'];
-const color=cc=>{const i=ccOrder.indexOf(cc);return i<0?'#5a6176':pal[i%pal.length];};
+const color=cc=>{if(cc==='SEA')return '#38bdf8';if(!cc)return '#454b60';
+ const i=ccOrder.indexOf(cc);return i<0?'#454b60':pal[i%pal.length];};
+const ncol=n=>n.cc?color(n.cc):(n.kind==='sea'?'#38bdf8':'#454b60');
 const place=n=>n.cc?(CC[n.cc]?CC[n.cc][0]:n.cc):(n.kind==='sea'?'At sea · '+(n.loc||''):null);
 
 // ---------- stats ----------
@@ -166,7 +168,9 @@ const F={yr:null,cc:null,trip:null,q:''};
 const pass=n=>{
   if(n.id===ME)return true;
   if(F.yr&&n.yr!==F.yr)return false;
-  if(F.cc&&(F.cc==='SEA'?n.kind!=='sea':n.cc!==F.cc))return false;
+  if(F.cc){ if(F.cc==='SEA'){if(n.kind!=='sea')return false;}
+    else if(F.cc==='ZZ'){if(n.cc||n.kind==='sea')return false;}
+    else if(n.cc!==F.cc)return false; }
   if(F.trip&&n.trip!==F.trip)return false;
   if(F.q){const s=(n.un+' '+(n.full||'')+' '+(n.loc||'')).toLowerCase();if(!s.includes(F.q))return false;}
   return true;
@@ -201,11 +205,18 @@ bOrder.forEach((b,i)=>{const a=(i/bOrder.length)*2*Math.PI, r=i===0?120:150+((i%
   anchor.set(b,[Math.cos(a)*r,Math.sin(a)*r]);});
 const bkt=n=>n.cc||(n.kind==='sea'?'SEA':'ZZ');
 
+const cl=root.append('g');
+const bCount={};friends.forEach(n=>{const b=bkt(n);bCount[b]=(bCount[b]||0)+1;});
+cl.selectAll('text').data(bOrder.filter(b=>bCount[b]>=3)).join('text')
+ .attr('x',b=>anchor.get(b)[0]).attr('y',b=>anchor.get(b)[1]-30)
+ .attr('text-anchor','middle').attr('font-size',11).attr('font-weight',700)
+ .attr('fill',b=>b==='ZZ'?'#565c73':color(b==='SEA'?'SEA':b)).attr('fill-opacity',.75)
+ .text(b=>b==='SEA'?'AT SEA':(b==='ZZ'?'NOT TRAVELLING':(CC[b]?CC[b][0].toUpperCase():b)));
 const link=lg.selectAll('line').data(links).join('line').attr('stroke-width',1.3);
 const node=ng.selectAll('g').data(friends.concat([me]),d=>d.id).join('g').style('cursor','pointer');
 node.append('circle')
   .attr('r',d=>d.id===ME?16:4.5+Math.min(d.deg,8)*1.3)
-  .attr('fill',d=>d.id===ME?'#fff':color(d.cc))
+  .attr('fill',d=>d.id===ME?'#fff':ncol(d))
   .attr('fill-opacity',d=>d.id===ME?1:(d.cov?.92:.5))
   .attr('stroke',d=>d.id===ME?'#4f9cff':'#0b0c12').attr('stroke-width',d=>d.id===ME?3:1.1);
 node.append('text').text(d=>d.id===ME?'Nicholas':'')
@@ -250,13 +261,15 @@ svg.on('click',e=>{if(e.target.tagName==='svg')det.classed('on',false);});
 // ---------- legend (countries) ----------
 const legRows=[...D.cc];
 if(sea)legRows.unshift(['SEA',sea]);
+const nomap=friends.filter(n=>!n.cc&&n.kind!=='sea').length;
+if(nomap)legRows.push(['ZZ',nomap]);
 const leg=d3.select('#leg');
 leg.append('b').text('where they followed');
 legRows.forEach(([cc,n])=>{
   const r=leg.append('div').attr('class','lrow').attr('data-cc',cc)
    .on('click',()=>{F.cc=F.cc===cc?null:cc;redraw();});
-  r.append('div').attr('class','dot').style('background',cc==='SEA'?'#5a6176':color(cc));
-  r.append('div').text(cc==='SEA'?'At sea':(CC[cc]?CC[cc][0]:cc));
+  r.append('div').attr('class','dot').style('background',color(cc));
+  r.append('div').text(cc==='SEA'?'At sea':cc==='ZZ'?'Not travelling':(CC[cc]?CC[cc][0]:cc));
   r.append('span').text(n);
 });
 
@@ -270,9 +283,16 @@ function drawMap(){
   mg.selectAll('path').data(land.features).join('path').attr('d',path)
     .attr('fill','#141725').attr('stroke','#1f2334').attr('stroke-width',.6);
   const data=D.cc.map(([cc,n])=>({cc,n,p:proj([CC[cc][2],CC[cc][1]])})).filter(d=>d.p);
-  const R=d3.scaleSqrt().domain([1,d3.max(data,d=>d.n)]).range([4.5,27]);
+  const R=d3.scaleSqrt().domain([1,d3.max(data,d=>d.n)]).range([5,26]);
+  data.forEach(d=>{d.x=d.p[0];d.y=d.p[1];});
+  d3.forceSimulation(data).force('c',d3.forceCollide(d=>R(d.n)+2.5).strength(.9))
+    .force('x',d3.forceX(d=>d.p[0]).strength(.55)).force('y',d3.forceY(d=>d.p[1]).strength(.55))
+    .stop().tick(140);
+  bub.selectAll('line').data(data).join('line')
+    .attr('x1',d=>d.p[0]).attr('y1',d=>d.p[1]).attr('x2',d=>d.x).attr('y2',d=>d.y)
+    .attr('stroke',d=>color(d.cc)).attr('stroke-opacity',.45).attr('stroke-width',1);
   const g=bub.selectAll('g').data(data).join('g')
-    .attr('transform',d=>`translate(${d.p[0]},${d.p[1]})`).style('cursor','pointer')
+    .attr('transform',d=>`translate(${d.x},${d.y})`).style('cursor','pointer')
     .on('click',(e,d)=>{F.cc=F.cc===d.cc?null:d.cc;redraw();});
   g.selectAll('circle').data(d=>[d]).join('circle').attr('r',d=>R(d.n))
     .attr('fill',d=>color(d.cc)).attr('fill-opacity',.42)
@@ -356,7 +376,7 @@ function redraw(){
   d3.selectAll('.brow[data-trip]').classed('on',function(){return F.trip===this.getAttribute('data-trip');});
   const bits=[];
   if(F.yr)bits.push(F.yr);
-  if(F.cc)bits.push(F.cc==='SEA'?'at sea':CC[F.cc][0]);
+  if(F.cc)bits.push(F.cc==='SEA'?'at sea':F.cc==='ZZ'?'not travelling':CC[F.cc][0]);
   if(F.trip)bits.push(F.trip.slice(0,34));
   if(F.q)bits.push('"'+F.q+'"');
   d3.select('#count').text(vis.size+' of '+friends.length+' friends'+(bits.length?' · '+bits.join(' · '):''));
