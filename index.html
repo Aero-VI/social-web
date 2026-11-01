@@ -58,7 +58,7 @@ node{}
   <div class="legend" id="legend"></div>
 </div>
 <div class="cols">
-  <div class="box"><h2>Strongest Overlap</h2><p class="d">People whose following list intersects most with Nicholas's. Shared taste, shared circle.</p><div id="mut"></div></div>
+  <div class="box"><h2>Strongest Overlap</h2><p class="d">People whose following list intersects most with his own. Shared taste, shared circle.</p><div id="mut"></div></div>
   <div class="box"><h2>Most Connected</h2><p class="d">Accounts the rest of his orbit also follows. The gravitational centres of his world.</p><div id="conn"></div></div>
 </div>
 <div class="note" id="note"></div>
@@ -82,7 +82,7 @@ d3.json('data.json').then(D=>{
    <span class="bar"><i style="width:${Math.max(4,d[key]/mx*100)}%"></i></span><span class="val">${d[key]}</span></div>`).join(''))};
  lb('#mut',D.topmut,'n'); lb('#conn',D.topconn,'n');
  d3.select('#note').html(`Built from live Instagram data: ${S.following} following records and ${S.crawled} fully traversed follow-graphs,
-   ${S.edges.toLocaleString()} directed edges between accounts inside his own orbit.<br>Private accounts return nothing, so family mostly sits outside this map by design.`);
+   ${S.edges.toLocaleString()} directed edges between accounts inside his own orbit.<br>Private accounts return nothing, so most of the family sits outside this map by design.`);
 
  const el=document.getElementById('graph'), W=el.clientWidth, H=el.clientHeight;
  const svg=d3.select('#graph').append('svg').attr('width',W).attr('height',H);
