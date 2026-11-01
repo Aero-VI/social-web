@@ -243,9 +243,10 @@ function fit(pad){
   if(!vs.length)return;
   const x0=d3.min(vs,d=>d.x),x1=d3.max(vs,d=>d.x),y0=d3.min(vs,d=>d.y),y1=d3.max(vs,d=>d.y);
   const w=Math.max(x1-x0,80),h=Math.max(y1-y0,80);
-  const k=Math.min(.95,(W()-(pad||70))/w,(H-(pad||70))/h);
+  const off=W()>900?250:0;                       // keep clear of the legend
+  const k=Math.min(.95,(W()-off-(pad||70))/w,(H-(pad||70))/h);
   root.transition().duration(500).attr('transform',
-    `translate(${W()/2-k*(x0+x1)/2},${H/2-k*(y0+y1)/2}) scale(${k})`);
+    `translate(${off+(W()-off)/2-k*(x0+x1)/2},${H/2-k*(y0+y1)/2}) scale(${k})`);
 }
 setTimeout(()=>fit(),2600);
 node.call(d3.drag()
