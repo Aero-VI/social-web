@@ -91,7 +91,7 @@ footer a{color:var(--acc);text-decoration:none}
 <small>Every node is a friend, grouped by the country he was in when they followed him. A line means those
 two people <b>follow each other</b>, not just him. Drag, scroll to zoom, click anyone.</small></h2>
 <div class="bar" id="yrbar"></div>
-<div class="bar"><input type="search" id="q" placeholder="search a name or handle…"><button class="chip" id="reset">clear filters</button><span class="hint" id="count"></span></div>
+<div class="bar"><input type="search" id="q" placeholder="search a name or handle…"><button class="chip" id="reset">clear filters</button><button class="chip" id="fit">re-centre</button><span class="hint" id="count"></span></div>
 <div class="stage">
 <svg id="g" height="680"></svg>
 <div class="legend" id="leg"></div>
@@ -165,6 +165,7 @@ d3.select('#covnote').text(D.stats.covered+' of '+D.stats.mutuals+' friends have
 
 // ---------- shared filter ----------
 const F={yr:null,cc:null,trip:null,q:''};
+let visSet=new Set();
 const pass=n=>{
   if(n.id===ME)return true;
   if(F.yr&&n.yr!==F.yr)return false;
@@ -190,7 +191,6 @@ d3.select('#q').on('input',function(){F.q=this.value.trim().toLowerCase();redraw
 // ---------- force graph ----------
 const svg=d3.select('#g'), W=()=>svg.node().clientWidth, H=680;
 const root=svg.append('g');
-svg.call(d3.zoom().scaleExtent([.4,4]).on('zoom',e=>root.attr('transform',e.transform)));
 const lg=root.append('g').attr('stroke','#38507a').attr('stroke-opacity',.9),
       ng=root.append('g');
 lg.attr('stroke','#38507a');
@@ -236,8 +236,18 @@ const sim=d3.forceSimulation(friends.concat([me]))
     labs.attr('x',b=>{const m=friends.filter(n=>bkt(n)===b&&n.x!=null);return m.length?d3.mean(m,n=>n.x):anchor.get(b)[0];})
         .attr('y',b=>{const m=friends.filter(n=>bkt(n)===b&&n.y!=null);return (m.length?d3.min(m,n=>n.y):anchor.get(b)[1])-13;});
   });
-root.attr('transform',`translate(${W()/2},${H/2}) scale(.62)`);
-setTimeout(()=>root.attr('transform',`translate(${W()/2},${H/2}) scale(.62)`),50);
+const zoom=d3.zoom().scaleExtent([.25,4]).on('zoom',e=>root.attr('transform',e.transform));
+svg.call(zoom);
+function fit(pad){
+  const vs=friends.concat([me]).filter(d=>d.x!=null&&(d.id===ME||visSet.has(d.id)));
+  if(!vs.length)return;
+  const x0=d3.min(vs,d=>d.x),x1=d3.max(vs,d=>d.x),y0=d3.min(vs,d=>d.y),y1=d3.max(vs,d=>d.y);
+  const w=Math.max(x1-x0,80),h=Math.max(y1-y0,80);
+  const k=Math.min(.95,(W()-(pad||70))/w,(H-(pad||70))/h);
+  root.transition().duration(500).attr('transform',
+    `translate(${W()/2-k*(x0+x1)/2},${H/2-k*(y0+y1)/2}) scale(${k})`);
+}
+setTimeout(()=>fit(),2600);
 node.call(d3.drag()
   .on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;})
   .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y;})
@@ -368,7 +378,7 @@ D.links.map(l=>[byId.get(l.s),byId.get(l.t)]).filter(p=>p[0]&&p[1])
 // ---------- redraw ----------
 const mpeople=d3.select('#mpeople');
 function redraw(){
-  const vis=new Set(friends.filter(pass).map(n=>n.id));
+  const vis=new Set(friends.filter(pass).map(n=>n.id)); visSet=vis;
   node.style('display',d=>d.id===ME||vis.has(d.id)?null:'none')
       .select('circle').attr('fill-opacity',d=>d.id===ME?1:(d.cov?.92:.5));
   link.style('display',d=>vis.has(d.source.id)&&vis.has(d.target.id)?null:'none');
@@ -385,10 +395,11 @@ function redraw(){
   const list=friends.filter(pass).sort((a,b)=>(a.d||'').localeCompare(b.d||''));
   mpeople.html(bits.length?list.map(n=>
     `<a class="pill" href="https://instagram.com/${n.un}" target="_blank" rel="noopener">@${n.un}${n.loc?' · '+n.loc:''}</a>`).join(''):'');
-  sim.alpha(.25).restart();
+  sim.alpha(.3).restart(); setTimeout(()=>fit(),900);
 }
+d3.select('#fit').on('click',()=>fit());
 redraw();
-window.addEventListener('resize',()=>{drawMap();drawTl();root.attr('transform',`translate(${W()/2},${H/2}) scale(.62)`);});
+window.addEventListener('resize',()=>{drawMap();drawTl();fit();});
 });
 </script>
 </body></html>
