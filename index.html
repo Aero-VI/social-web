@@ -93,7 +93,7 @@ two people <b>follow each other</b>, not just him. Drag, scroll to zoom, click a
 <div class="bar" id="yrbar"></div>
 <div class="bar"><input type="search" id="q" placeholder="search a name or handle…"><button class="chip" id="reset">clear filters</button><span class="hint" id="count"></span></div>
 <div class="stage">
-<svg id="g" height="620"></svg>
+<svg id="g" height="680"></svg>
 <div class="legend" id="leg"></div>
 <div class="detail" id="det"></div>
 </div>
@@ -188,7 +188,7 @@ d3.select('#reset').on('click',()=>{F.yr=F.cc=F.trip=null;F.q='';d3.select('#q')
 d3.select('#q').on('input',function(){F.q=this.value.trim().toLowerCase();redraw();});
 
 // ---------- force graph ----------
-const svg=d3.select('#g'), W=()=>svg.node().clientWidth, H=620;
+const svg=d3.select('#g'), W=()=>svg.node().clientWidth, H=680;
 const root=svg.append('g');
 svg.call(d3.zoom().scaleExtent([.4,4]).on('zoom',e=>root.attr('transform',e.transform)));
 const lg=root.append('g').attr('stroke','#38507a').attr('stroke-opacity',.9),
@@ -201,14 +201,14 @@ const bOrder=buckets.sort((a,b)=>{
   const ca=friends.filter(n=>(n.cc||(n.kind==='sea'?'SEA':'ZZ'))===a).length;
   const cb=friends.filter(n=>(n.cc||(n.kind==='sea'?'SEA':'ZZ'))===b).length;return cb-ca;});
 const anchor=new Map();
-bOrder.forEach((b,i)=>{const a=(i/bOrder.length)*2*Math.PI, r=i===0?120:150+((i%4)*52);
-  anchor.set(b,[Math.cos(a)*r,Math.sin(a)*r]);});
+bOrder.forEach((b,i)=>{const a=(i/bOrder.length)*2*Math.PI*1.0+0.6, r=210+((i%5)*78);
+  anchor.set(b,[Math.cos(a)*r*1.45,Math.sin(a)*r*0.95]);});
 const bkt=n=>n.cc||(n.kind==='sea'?'SEA':'ZZ');
 
 const cl=root.append('g');
 const bCount={};friends.forEach(n=>{const b=bkt(n);bCount[b]=(bCount[b]||0)+1;});
-cl.selectAll('text').data(bOrder.filter(b=>bCount[b]>=3)).join('text')
- .attr('x',b=>anchor.get(b)[0]).attr('y',b=>anchor.get(b)[1]-30)
+const labBk=bOrder.filter(b=>bCount[b]>=3);
+const labs=cl.selectAll('text').data(labBk).join('text')
  .attr('text-anchor','middle').attr('font-size',11).attr('font-weight',700)
  .attr('fill',b=>b==='ZZ'?'#565c73':color(b==='SEA'?'SEA':b)).attr('fill-opacity',.75)
  .text(b=>b==='SEA'?'AT SEA':(b==='ZZ'?'NOT TRAVELLING':(CC[b]?CC[b][0].toUpperCase():b)));
@@ -224,18 +224,20 @@ node.append('text').text(d=>d.id===ME?'Nicholas':'')
 node.append('title').text(d=>'@'+d.un+(place(d)?' · '+place(d):'')+(d.d?' · '+d.d:''));
 
 const sim=d3.forceSimulation(friends.concat([me]))
-  .force('link',d3.forceLink(links).id(d=>d.id).distance(46).strength(.55))
-  .force('charge',d3.forceManyBody().strength(d=>d.id===ME?-900:-42))
-  .force('x',d3.forceX(d=>d.id===ME?0:anchor.get(bkt(d))[0]).strength(.22))
-  .force('y',d3.forceY(d=>d.id===ME?0:anchor.get(bkt(d))[1]).strength(.22))
-  .force('col',d3.forceCollide(d=>d.id===ME?22:11))
+  .force('link',d3.forceLink(links).id(d=>d.id).distance(52).strength(.22))
+  .force('charge',d3.forceManyBody().strength(d=>d.id===ME?-700:-26))
+  .force('x',d3.forceX(d=>d.id===ME?0:anchor.get(bkt(d))[0]).strength(.55))
+  .force('y',d3.forceY(d=>d.id===ME?0:anchor.get(bkt(d))[1]).strength(.55))
+  .force('col',d3.forceCollide(d=>d.id===ME?24:9.5))
   .on('tick',()=>{
     link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
         .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
     node.attr('transform',d=>`translate(${d.x},${d.y})`);
+    labs.attr('x',b=>{const m=friends.filter(n=>bkt(n)===b&&n.x!=null);return m.length?d3.mean(m,n=>n.x):anchor.get(b)[0];})
+        .attr('y',b=>{const m=friends.filter(n=>bkt(n)===b&&n.y!=null);return (m.length?d3.min(m,n=>n.y):anchor.get(b)[1])-13;});
   });
-root.attr('transform',`translate(${W()/2},${H/2})`);
-setTimeout(()=>root.attr('transform',`translate(${W()/2},${H/2})`),50);
+root.attr('transform',`translate(${W()/2},${H/2}) scale(.62)`);
+setTimeout(()=>root.attr('transform',`translate(${W()/2},${H/2}) scale(.62)`),50);
 node.call(d3.drag()
   .on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;})
   .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y;})
@@ -386,7 +388,7 @@ function redraw(){
   sim.alpha(.25).restart();
 }
 redraw();
-window.addEventListener('resize',()=>{drawMap();drawTl();root.attr('transform',`translate(${W()/2},${H/2})`);});
+window.addEventListener('resize',()=>{drawMap();drawTl();root.attr('transform',`translate(${W()/2},${H/2}) scale(.62)`);});
 });
 </script>
 </body></html>
