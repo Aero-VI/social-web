@@ -87,35 +87,36 @@ d3.json('data.json').then(D=>{
  const el=document.getElementById('graph'), W=el.clientWidth, H=el.clientHeight;
  const svg=d3.select('#graph').append('svg').attr('width',W).attr('height',H);
  const g=svg.append('g');
- svg.call(d3.zoom().scaleExtent([.25,6]).on('zoom',e=>g.attr('transform',e.transform)));
+ const zoom=d3.zoom().scaleExtent([.15,8]).on('zoom',e=>g.attr('transform',e.transform)); svg.call(zoom);
  const nodes=D.nodes.map(d=>({...d})), links=D.links.map(d=>({source:d.s,target:d.t,me:d.me}));
  const sim=d3.forceSimulation(nodes)
-  .force('link',d3.forceLink(links).id(d=>d.id).distance(l=>l.me?95:42).strength(l=>l.me?.055:.14))
-  .force('charge',d3.forceManyBody().strength(d=>d.me?-1400:-54))
+  .force('link',d3.forceLink(links).id(d=>d.id).distance(l=>l.me?70:34).strength(l=>l.me?.12:.5))
+  .force('charge',d3.forceManyBody().strength(d=>d.me?-900:-90).distanceMax(380))
   .force('center',d3.forceCenter(W/2,H/2))
-  .force('collide',d3.forceCollide().radius(d=>R(d)+2.5));
- function R(d){return d.me?17:Math.min(15,3.1+Math.sqrt(d.deg)*1.5)}
+  .force('x',d3.forceX(W/2).strength(.045)).force('y',d3.forceY(H/2).strength(.055))
+  .force('collide',d3.forceCollide().radius(d=>R(d)+3.5).iterations(2))
+  .stop();
+ function R(d){return d.me?18:Math.min(16,3.4+Math.sqrt(d.deg)*1.7)}
+ for(let i=0;i<420;i++) sim.tick();
  const link=g.append('g').selectAll('line').data(links).join('line')
-   .attr('stroke',d=>d.me?'#ffffff':'#39405c').attr('stroke-opacity',d=>d.me?.07:.19).attr('stroke-width',d=>d.me?.5:.65);
+   .attr('stroke',d=>d.me?'#ffffff':'#4a5578').attr('stroke-opacity',d=>d.me?.055:.3).attr('stroke-width',d=>d.me?.45:.75);
  const node=g.append('g').selectAll('circle').data(nodes).join('circle')
    .attr('r',R).attr('fill',d=>d.me?'#fff':C[d.c]||C[8])
    .attr('stroke',d=>d.me?'#4f9cff':'#07070b').attr('stroke-width',d=>d.me?2.5:.9)
    .style('cursor','pointer')
    .call(d3.drag().on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y})
      .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y}).on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}));
- const lbl=g.append('g').selectAll('text').data(nodes.filter(d=>d.me||d.deg>=6)).join('text')
-   .text(d=>'@'+d.un).attr('font-size',d=>d.me?13:9.5).attr('fill',d=>d.me?'#fff':'#9aa3bd')
-   .attr('text-anchor','middle').attr('font-weight',d=>d.me?700:500).style('pointer-events','none');
- const tip=d3.select('#tip');
- node.on('mouseover',(e,d)=>{tip.style('opacity',1).html(`<div class="u">@${d.un}</div>${d.full?`<div class="m">${d.full}</div>`:''}
-   <div class="m">${d.me?`follows ${d.deg} accounts`:`${d.deg} of his orbit follow this account${d.mut?` · ${d.mut} shared with Nicholas`:''}`}</div>`);
-   node.attr('opacity',n=>n===d||links.some(l=>(l.source===d&&l.target===n)||(l.target===d&&l.source===n))?1:.14);
-   link.attr('stroke-opacity',l=>l.source===d||l.target===d?.75:.03).attr('stroke',l=>l.source===d||l.target===d?'#4f9cff':'#39405c');})
-  .on('mousemove',e=>tip.style('left',(e.clientX+15)+'px').style('top',(e.clientY-12)+'px'))
-  .on('mouseout',()=>{tip.style('opacity',0);node.attr('opacity',1);
-   link.attr('stroke',l=>l.me?'#ffffff':'#39405c').attr('stroke-opacity',l=>l.me?.07:.19);})
-  .on('click',(e,d)=>window.open('https://instagram.com/'+d.un,'_blank'));
- sim.on('tick',()=>{link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
-   node.attr('cx',d=>d.x).attr('cy',d=>d.y); lbl.attr('x',d=>d.x).attr('y',d=>d.y-R(d)-4);});
+ const lbl=g.append('g').selectAll('text').data(nodes.filter(d=>d.me||d.deg>=4)).join('text')
+   .text(d=>'@'+d.un).attr('font-size',d=>d.me?13.5:9.5).attr('fill',d=>d.me?'#fff':'#aab3cc')
+   .attr('text-anchor','middle').attr('font-weight',d=>d.me?700:500).style('pointer-events','none')
+   .style('paint-order','stroke').style('stroke','#07070b').style('stroke-width','2.6px');
+ function draw(){link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+   node.attr('cx',d=>d.x).attr('cy',d=>d.y); lbl.attr('x',d=>d.x).attr('y',d=>d.y-R(d)-4);}
+ sim.on('tick',draw); draw();
+ const xs=nodes.map(d=>d.x), ys=nodes.map(d=>d.y);
+ const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+ const k=Math.min(8,.9/Math.max((x1-x0)/W,(y1-y0)/H));
+ const t=d3.zoomIdentity.translate(W/2-k*(x0+x1)/2,H/2-k*(y0+y1)/2).scale(k);
+ svg.call(zoom.transform,t);
 });
 </script></body></html>
