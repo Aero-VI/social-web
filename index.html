@@ -2,121 +2,321 @@
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>The Web — @nnickkh social graph</title>
-<meta name="description" content="A measured map of Nicholas Halka's Instagram orbit: who he follows, who follows whom, and where the clusters are.">
+<meta name="description" content="A measured map of Nicholas Halka's Instagram orbit: the 278 accounts that follow him back, who among them follows whom, when each friendship started, and 1.1M followers plotted month by month.">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#07070b;--panel:#0f1018;--line:#1e2030;--txt:#e9ecf5;--dim:#8089a3;
---c0:#4f9cff;--c1:#a855f7;--c2:#f97316;--c3:#22c55e;--c4:#ef4444;--c5:#06b6d4;--c6:#eab308;--c7:#ec4899;--c8:#64748b}
-body{background:var(--bg);color:var(--txt);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;overflow-x:hidden}
-.wrap{max-width:1280px;margin:0 auto;padding:0 20px}
-header{padding:64px 0 28px;text-align:center}
-h1{font-size:clamp(34px,7vw,68px);font-weight:800;letter-spacing:-.03em;line-height:1
-;background:linear-gradient(100deg,#4f9cff,#a855f7 40%,#f97316 75%,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{color:var(--dim);margin-top:14px;font-size:17px}
-.sub b{color:var(--txt)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:34px 0}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 16px;text-align:center}
-.card .n{font-size:28px;font-weight:800;letter-spacing:-.02em}
-.card .l{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.09em;margin-top:4px}
-#graph{width:100%;height:76vh;min-height:560px;background:radial-gradient(ellipse at 50% 45%,#11131f 0%,#07070b 72%);
+:root{--bg:#07070b;--panel:#0f1018;--line:#1e2030;--txt:#e9ecf5;--dim:#8089a3;--acc:#4f9cff}
+body{background:var(--bg);color:var(--txt);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1320px;margin:0 auto;padding:0 18px}
+header{padding:56px 0 18px;text-align:center}
+h1{font-size:clamp(34px,7vw,66px);font-weight:800;letter-spacing:-.03em;line-height:1;
+background:linear-gradient(100deg,#4f9cff,#a855f7 40%,#f97316 75%,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--dim);margin-top:13px;font-size:16.5px}.sub b{color:var(--txt)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin:28px 0 16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 14px;text-align:center}
+.card .n{font-size:26px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.card .l{color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;margin-top:3px}
+
+.bar2{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.seg button{background:none;border:0;color:var(--dim);font:600 12.5px/1 inherit;padding:10px 14px;cursor:pointer;letter-spacing:.02em}
+.seg button.on{background:#1b2740;color:#cfe0ff}
+.seg button:hover{color:var(--txt)}
+input[type=search]{background:var(--panel);border:1px solid var(--line);border-radius:11px;color:var(--txt);
+padding:10px 13px;font:inherit;font-size:13px;min-width:220px;flex:1}
+input[type=search]:focus{outline:none;border-color:#2e3550}
+.clr{background:var(--panel);border:1px solid var(--line);border-radius:11px;color:var(--dim);
+font:600 12.5px/1 inherit;padding:10px 13px;cursor:pointer}.clr:hover{color:var(--txt)}
+
+.stage{display:grid;grid-template-columns:1fr 272px;gap:14px}
+@media(max-width:900px){.stage{grid-template-columns:1fr}}
+#graph{width:100%;height:72vh;min-height:520px;background:radial-gradient(ellipse at 50% 45%,#11131f 0%,#07070b 72%);
 border:1px solid var(--line);border-radius:18px;position:relative;overflow:hidden;cursor:grab}
-#graph:active{cursor:grabbing}
-.hint{position:absolute;left:16px;top:14px;color:var(--dim);font-size:12px;z-index:3;pointer-events:none}
-.legend{position:absolute;right:14px;top:14px;z-index:3;font-size:11.5px;background:rgba(10,11,18,.82);
-border:1px solid var(--line);border-radius:10px;padding:10px 12px;backdrop-filter:blur(8px)}
-.legend div{display:flex;align-items:center;gap:7px;margin:3px 0;color:var(--dim)}
-.dot{width:9px;height:9px;border-radius:50%;flex:none}
+#graph:active{cursor:grabbing}#cv{display:block;width:100%;height:100%}
+.hint{position:absolute;left:15px;bottom:12px;color:#4b5268;font-size:11.5px;z-index:3;pointer-events:none}
+.side{display:flex;flex-direction:column;gap:12px}
+.pane{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+.pane h3{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:700;margin-bottom:10px}
+.lg{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:8px;cursor:pointer;font-size:12.5px;color:var(--dim)}
+.lg:hover{background:#171a26;color:var(--txt)}.lg.on{background:#1b2740;color:#cfe0ff}
+.lg .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.lg .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lg .ct{font-variant-numeric:tabular-nums;font-size:11.5px;color:#5f6880}
+#detail .big{font-size:17px;font-weight:700;letter-spacing:-.01em;word-break:break-all}
+#detail .fn{color:var(--dim);font-size:12.5px;margin-bottom:10px}
+#detail dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12.5px}
+#detail dt{color:#5f6880}#detail dd{text-align:right;font-variant-numeric:tabular-nums}
+#detail a.go{display:block;margin-top:12px;text-align:center;background:#1b2740;color:#cfe0ff;text-decoration:none;
+border-radius:10px;padding:9px;font-size:12.5px;font-weight:600}
+#detail a.go:hover{background:#24375c}
+.empty{color:#4d556b;font-size:12.5px}
+
 #tip{position:fixed;pointer-events:none;z-index:50;background:rgba(14,16,26,.96);border:1px solid #2a2d42;
-border-radius:11px;padding:9px 13px;font-size:13px;opacity:0;transition:opacity .12s;max-width:260px;box-shadow:0 10px 36px rgba(0,0,0,.6)}
+border-radius:11px;padding:9px 13px;font-size:13px;opacity:0;transition:opacity .1s;max-width:250px;box-shadow:0 10px 36px rgba(0,0,0,.6)}
 #tip .u{font-weight:700}#tip .m{color:var(--dim);font-size:11.5px;margin-top:3px}
-node{}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:34px 0 70px}
-@media(max-width:760px){.cols{grid-template-columns:1fr}}
-.box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
-.box h2{font-size:15px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:700;margin-bottom:4px}
-.box p.d{color:#5f6880;font-size:12.5px;margin-bottom:16px}
-.row{display:flex;align-items:center;gap:11px;padding:7px 0;border-top:1px solid #16182500}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
+@media(max-width:860px){.cols{grid-template-columns:1fr}}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+.box h2{font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:700}
+.box p.d{color:#5f6880;font-size:12.5px;margin:3px 0 14px}
+.yr{display:flex;align-items:flex-end;gap:5px;height:140px}
+.yc{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;cursor:pointer;height:100%}
+.yc i{display:block;width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,#4f9cff,#2b63b8);transition:.15s;min-height:2px}
+.yc:hover i{filter:brightness(1.35)}.yc.on i{background:linear-gradient(180deg,#f97316,#b4490c)}
+.yc b{font-size:10.5px;color:#5f6880;margin-top:6px;font-weight:600}
+.yc s{font-size:10.5px;color:var(--dim);text-decoration:none;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.yc.on b,.yc.on s{color:#ffb074}
+#growth{width:100%;height:190px;display:block}
+.gread{display:flex;justify-content:space-between;color:#5f6880;font-size:11.5px;margin-top:6px;font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:11px;padding:6px 0}
 .row+.row{border-top:1px solid #171a26}
-.rank{width:20px;color:#525b74;font-size:12px;font-variant-numeric:tabular-nums;flex:none}
-.row a{color:var(--txt);text-decoration:none;font-weight:600;font-size:13.5px}
-.row a:hover{color:#4f9cff}
-.row .fn{color:#5f6880;font-size:11.5px}
-.bar{flex:1;height:5px;background:#171a26;border-radius:3px;overflow:hidden;margin:0 4px}
+.rank{width:18px;color:#525b74;font-size:12px;font-variant-numeric:tabular-nums;flex:none}
+.row a{color:var(--txt);text-decoration:none;font-weight:600;font-size:13px}
+.row a:hover{color:var(--acc)}.row .fn{color:#5f6880;font-size:11.5px}
+.bar{flex:1;height:5px;background:#171a26;border-radius:3px;overflow:hidden}
 .bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#4f9cff,#a855f7)}
-.val{color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums;width:30px;text-align:right;flex:none}
-.note{color:#4d556b;font-size:12.5px;text-align:center;padding:0 0 60px;line-height:1.8}
-.vb{display:inline-block;width:11px;height:11px;vertical-align:-1px}
+.val{color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums;width:34px;text-align:right;flex:none}
+.note{color:#4d556b;font-size:12.5px;text-align:center;padding:12px 0 60px;line-height:1.8}
+.note b{color:#7a8299}
 </style></head><body>
 <div class="wrap">
 <header>
 <h1>The Web</h1>
-<div class="sub">Every account <b>@nnickkh</b> follows, and who among them follows each other.<br>Measured, not estimated.</div>
+<div class="sub"><b>278</b> people follow him back. This is what that actually looks like.</div>
 </header>
+
 <div class="stats" id="stats"></div>
-<div id="graph">
-  <div class="hint">drag to pan · scroll to zoom · click a node to open the profile</div>
-  <div class="legend" id="legend"></div>
+
+<div class="bar2">
+  <div class="seg" id="viewseg">
+    <button data-v="mut" class="on">Mutuals · 278</button>
+    <button data-v="all">Everyone he follows · 547</button>
+    <button data-v="one">One-way · 269</button>
+  </div>
+  <input type="search" id="q" placeholder="Search a name or @handle…" autocomplete="off">
+  <button class="clr" id="reset">Reset</button>
 </div>
+
+<div class="stage">
+  <div id="graph"><canvas id="cv"></canvas>
+    <div class="hint">drag to pan · scroll to zoom · click a node for detail</div>
+  </div>
+  <div class="side">
+    <div class="pane"><h3>Circles</h3><div id="legend"></div></div>
+    <div class="pane" id="detail"><h3>Selected</h3><div class="empty">Click any node.</div></div>
+  </div>
+</div>
+
 <div class="cols">
-  <div class="box"><h2>Strongest Overlap</h2><p class="d">People whose following list intersects most with his own. Shared taste, shared circle.</p><div id="mut"></div></div>
-  <div class="box"><h2>Most Connected</h2><p class="d">Accounts the rest of his orbit also follows. The gravitational centres of his world.</p><div id="conn"></div></div>
+  <div class="box">
+    <h2>When they followed back</h2>
+    <p class="d">Exact dates from his own Instagram export. Click a year to filter the graph.</p>
+    <div class="yr" id="years"></div>
+  </div>
+  <div class="box">
+    <h2>1,103,885 followers, month by month</h2>
+    <p class="d">Every follower he has, placed on the month they arrived. Hover the chart.</p>
+    <svg id="growth"></svg>
+    <div class="gread"><span id="gl">—</span><span id="gr">—</span></div>
+  </div>
 </div>
-<div class="note" id="note"></div>
+
+<div class="cols">
+  <div class="box"><h2>Most connected</h2><p class="d">Followed by the most other people inside his orbit.</p><div id="topconn"></div></div>
+  <div class="box"><h2>Oldest friendships</h2><p class="d">The accounts that followed him back first.</p><div id="oldest"></div></div>
+</div>
+
+<div class="note">
+Follow-back status and dates come from Nicholas's own Instagram data export — authoritative, not inferred.<br>
+The edges between other people were crawled and are a <b>lower bound</b>: private accounts show nothing.<br>
+Built by Azula.
+</div>
 </div>
 <div id="tip"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script>
-const C=['#4f9cff','#a855f7','#f97316','#22c55e','#ef4444','#06b6d4','#eab308','#ec4899','#64748b'];
-const NAMES=['Cluster A','Cluster B','Cluster C','Cluster D','Cluster E','Cluster F','Cluster G','Cluster H','Outer'];
-d3.json('data.json').then(D=>{
- const S=D.stats;
- const cards=[['following','Accounts followed'],['crawled','Graphs mapped'],['edges','Connections'],['verified','Verified'],['communities','Clusters']];
- d3.select('#stats').html(cards.map(([k,l])=>`<div class="card"><div class="n">${S[k].toLocaleString()}</div><div class="l">${l}</div></div>`).join(''));
- const used=[...new Set(D.nodes.filter(n=>!n.me).map(n=>n.c))].sort((a,b)=>a-b);
- d3.select('#legend').html('<div style="color:#e9ecf5;font-weight:600;margin-bottom:6px">Communities</div>'+
-   used.map(c=>`<div><span class="dot" style="background:${C[c]}"></span>${NAMES[c]||'Other'}</div>`).join('')+
-   `<div style="margin-top:6px"><span class="dot" style="background:#fff"></span>Nicholas</div>`);
- const lb=(sel,arr,key,label)=>{const mx=d3.max(arr,d=>d[key])||1;
-   d3.select(sel).html(arr.map((d,i)=>`<div class="row"><span class="rank">${i+1}</span>
-   <div style="min-width:124px"><a href="https://instagram.com/${d.un}" target="_blank" rel="noopener">@${d.un}</a>${d.ver?' <span style="color:#4f9cff">✦</span>':''}<div class="fn">${d.full||''}</div></div>
-   <span class="bar"><i style="width:${Math.max(4,d[key]/mx*100)}%"></i></span><span class="val">${d[key]}</span></div>`).join(''))};
- lb('#mut',D.topmut,'n'); lb('#conn',D.topconn,'n');
- d3.select('#note').html(`Built from live Instagram data: ${S.following} following records and ${S.crawled} fully traversed follow-graphs,
-   ${S.edges.toLocaleString()} directed edges between accounts inside his own orbit.<br>Private accounts return nothing, so most of the family sits outside this map by design.`);
+const COL=['#4f9cff','#a855f7','#f97316','#22c55e','#ef4444','#06b6d4','#eab308','#ec4899','#14b8a6','#8b5cf6'];
+const OUTER='#4a5366', ME='#ffffff';
+const fmt=n=>n.toLocaleString();
+let D,G,state={view:'mut',cluster:null,year:null,q:''},sel=null,hov=null;
 
- const el=document.getElementById('graph'), W=el.clientWidth, H=el.clientHeight;
- const svg=d3.select('#graph').append('svg').attr('width',W).attr('height',H);
- const g=svg.append('g');
- const zoom=d3.zoom().scaleExtent([.15,8]).on('zoom',e=>g.attr('transform',e.transform)); svg.call(zoom);
- const nodes=D.nodes.map(d=>({...d})), links=D.links.map(d=>({source:d.s,target:d.t,me:d.me}));
- const sim=d3.forceSimulation(nodes)
-  .force('link',d3.forceLink(links).id(d=>d.id).distance(l=>l.me?70:34).strength(l=>l.me?.12:.5))
-  .force('charge',d3.forceManyBody().strength(d=>d.me?-900:-90).distanceMax(380))
-  .force('center',d3.forceCenter(W/2,H/2))
-  .force('x',d3.forceX(W/2).strength(.045)).force('y',d3.forceY(H/2).strength(.055))
-  .force('collide',d3.forceCollide().radius(d=>R(d)+3.5).iterations(2))
-  .stop();
- function R(d){return d.me?18:Math.min(16,3.4+Math.sqrt(d.deg)*1.7)}
- for(let i=0;i<420;i++) sim.tick();
- const link=g.append('g').selectAll('line').data(links).join('line')
-   .attr('stroke',d=>d.me?'#ffffff':'#4a5578').attr('stroke-opacity',d=>d.me?.055:.3).attr('stroke-width',d=>d.me?.45:.75);
- const node=g.append('g').selectAll('circle').data(nodes).join('circle')
-   .attr('r',R).attr('fill',d=>d.me?'#fff':C[d.c]||C[8])
-   .attr('stroke',d=>d.me?'#4f9cff':'#07070b').attr('stroke-width',d=>d.me?2.5:.9)
-   .style('cursor','pointer')
-   .call(d3.drag().on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y})
-     .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y}).on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}));
- const lbl=g.append('g').selectAll('text').data(nodes.filter(d=>d.me||d.deg>=4)).join('text')
-   .text(d=>'@'+d.un).attr('font-size',d=>d.me?13.5:9.5).attr('fill',d=>d.me?'#fff':'#aab3cc')
-   .attr('text-anchor','middle').attr('font-weight',d=>d.me?700:500).style('pointer-events','none')
-   .style('paint-order','stroke').style('stroke','#07070b').style('stroke-width','2.6px');
- function draw(){link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
-   node.attr('cx',d=>d.x).attr('cy',d=>d.y); lbl.attr('x',d=>d.x).attr('y',d=>d.y-R(d)-4);}
- sim.on('tick',draw); draw();
- const xs=nodes.map(d=>d.x), ys=nodes.map(d=>d.y);
- const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
- const k=Math.min(8,.9/Math.max((x1-x0)/W,(y1-y0)/H));
- const t=d3.zoomIdentity.translate(W/2-k*(x0+x1)/2,H/2-k*(y0+y1)/2).scale(k);
- svg.call(zoom.transform,t);
+Promise.all([d3.json('data2.json'),d3.json('growth.json').catch(()=>null)]).then(([d,g])=>{
+  D=d;G=g;
+  const s=d.stats;
+  d3.select('#stats').html([
+    ['Follows back',fmt(s.mutual)],['He follows',fmt(s.following)],['One-way',fmt(s.oneway)],
+    ['Followers',(s.followers/1e6).toFixed(2)+'M'],['Links mapped',fmt(s.edges)],['Circles',s.communities]
+  ].map(([l,n])=>`<div class="card"><div class="n">${n}</div><div class="l">${l}</div></div>`).join(''));
+
+  drawLegend(); drawYears(); drawGrowth(); drawLists(); initGraph(); apply();
+
+  d3.selectAll('#viewseg button').on('click',function(){
+    d3.selectAll('#viewseg button').classed('on',false);d3.select(this).classed('on',true);
+    state.view=this.dataset.v;apply();});
+  d3.select('#q').on('input',function(){state.q=this.value.trim().toLowerCase();apply();});
+  d3.select('#reset').on('click',()=>{state={view:'mut',cluster:null,year:null,q:''};sel=null;
+    d3.select('#q').property('value','');
+    d3.selectAll('#viewseg button').classed('on',(_,i,n)=>n[i].dataset.v==='mut');
+    drawLegend();drawYears();detail(null);apply();});
 });
-</script></body></html>
+
+function visible(n){
+  if(n.me) return true;
+  if(state.view==='mut'&&!n.fb) return false;
+  if(state.view==='one'&&n.fb) return false;
+  if(state.cluster!==null&&n.c!==state.cluster) return false;
+  if(state.year!==null&&n.yr!==state.year) return false;
+  if(state.q&&!(n.un.toLowerCase().includes(state.q)||(n.full||'').toLowerCase().includes(state.q))) return false;
+  return true;
+}
+function colorOf(n){return n.me?ME:(n.c>=0?COL[n.c%COL.length]:OUTER);}
+
+/* ---------- legend ---------- */
+function drawLegend(){
+  const rows=D.communities.map(c=>`<div class="lg ${state.cluster===c.c?'on':''}" data-c="${c.c}">
+    <span class="dot" style="background:${COL[c.c%COL.length]}"></span>
+    <span class="nm">${c.lead}'s circle</span><span class="ct">${c.nmut}/${c.n}</span></div>`).join('')
+   +`<div class="lg ${state.cluster===-2?'on':''}" data-c="-2">
+     <span class="dot" style="background:${OUTER}"></span><span class="nm">No mapped links</span>
+     <span class="ct">${D.nodes.filter(n=>n.c<0&&!n.me&&n.fb).length}/${D.nodes.filter(n=>n.c<0&&!n.me).length}</span></div>`;
+  d3.select('#legend').html(rows);
+  d3.selectAll('.lg').on('click',function(){
+    const c=+this.dataset.c;state.cluster=state.cluster===c?null:c;drawLegend();apply();});
+}
+/* ---------- years ---------- */
+function drawYears(){
+  const mx=d3.max(D.years,y=>y.n);
+  d3.select('#years').html(D.years.map(y=>`<div class="yc ${state.year===y.y?'on':''}" data-y="${y.y}">
+    <s>${y.n}</s><i style="height:${Math.max(3,y.n/mx*100)}%"></i><b>'${String(y.y).slice(2)}</b></div>`).join(''));
+  d3.selectAll('.yc').on('click',function(){
+    const y=+this.dataset.y;state.year=state.year===y?null:y;drawYears();apply();});
+}
+/* ---------- growth ---------- */
+function drawGrowth(){
+  if(!G){d3.select('#growth').remove();return;}
+  const svg=d3.select('#growth'),W=svg.node().clientWidth||600,H=190;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  const s=G.series,x=d3.scalePoint().domain(s.map(d=>d.m)).range([0,W]),
+        y=d3.scaleSqrt().domain([0,d3.max(s,d=>d.n)]).range([H-18,6]);
+  const area=d3.area().x(d=>x(d.m)).y0(H-18).y1(d=>y(d.n)).curve(d3.curveMonotoneX);
+  const line=d3.line().x(d=>x(d.m)).y(d=>y(d.n)).curve(d3.curveMonotoneX);
+  const gd=svg.append('defs').append('linearGradient').attr('id','gg').attr('x1',0).attr('y1',0).attr('x2',0).attr('y2',1);
+  gd.append('stop').attr('offset','0%').attr('stop-color','#4f9cff').attr('stop-opacity',.55);
+  gd.append('stop').attr('offset','100%').attr('stop-color','#4f9cff').attr('stop-opacity',0);
+  svg.append('path').datum(s).attr('d',area).attr('fill','url(#gg)');
+  svg.append('path').datum(s).attr('d',line).attr('fill','none').attr('stroke','#4f9cff').attr('stroke-width',1.6);
+  const mk=svg.append('circle').attr('r',3.5).attr('fill','#fff').attr('opacity',0);
+  const rule=svg.append('line').attr('y1',0).attr('y2',H-18).attr('stroke','#2a2d42').attr('opacity',0);
+  s.filter(d=>d.m.endsWith('-01')).forEach(d=>svg.append('text').attr('x',x(d.m)).attr('y',H-4)
+    .attr('fill','#4b5268').attr('font-size',9.5).attr('text-anchor','middle').text(d.m.slice(0,4)));
+  svg.on('mousemove',function(e){
+    const mx=d3.pointer(e,this)[0]*(W/this.getBoundingClientRect().width);
+    let best=s[0],bd=1e9;s.forEach(d=>{const dd=Math.abs(x(d.m)-mx);if(dd<bd){bd=dd;best=d;}});
+    mk.attr('cx',x(best.m)).attr('cy',y(best.n)).attr('opacity',1);
+    rule.attr('x1',x(best.m)).attr('x2',x(best.m)).attr('opacity',1);
+    d3.select('#gl').text(best.m+' · +'+fmt(best.n));
+    d3.select('#gr').text('total '+fmt(best.cum));
+  }).on('mouseleave',()=>{mk.attr('opacity',0);rule.attr('opacity',0);
+    d3.select('#gl').text('—');d3.select('#gr').text('—');});
+  const last=s[s.length-1];d3.select('#gl').text(last.m+' · +'+fmt(last.n));d3.select('#gr').text('total '+fmt(last.cum));
+}
+/* ---------- lists ---------- */
+function drawLists(){
+  const row=(i,n,v,mx)=>`<div class="row"><span class="rank">${i+1}</span>
+    <a href="https://instagram.com/${n.un}" target="_blank" rel="noopener">@${n.un}</a>
+    <span class="fn">${(n.full||'').slice(0,20)}</span>
+    <span class="bar"><i style="width:${v/mx*100}%"></i></span><span class="val">${v}</span></div>`;
+  const conn=D.nodes.filter(n=>!n.me&&n.fb).sort((a,b)=>b.deg-a.deg).slice(0,10);
+  d3.select('#topconn').html(conn.map((n,i)=>row(i,n,n.deg,conn[0].deg||1)).join(''));
+  const old=D.nodes.filter(n=>n.fb&&n.ts).sort((a,b)=>a.ts-b.ts).slice(0,10);
+  d3.select('#oldest').html(old.map((n,i)=>`<div class="row"><span class="rank">${i+1}</span>
+    <a href="https://instagram.com/${n.un}" target="_blank" rel="noopener">@${n.un}</a>
+    <span class="fn">${(n.full||'').slice(0,18)}</span>
+    <span class="bar"></span><span class="val" style="width:62px">${new Date(n.ts*1e3).toLocaleDateString('en',{month:'short',year:'numeric'})}</span></div>`).join(''));
+}
+/* ---------- graph ---------- */
+let cv,ctx,sim,W,H,tf=d3.zoomIdentity,nodes=[],links=[];
+function initGraph(){
+  cv=document.getElementById('cv');ctx=cv.getContext('2d');
+  size();window.addEventListener('resize',()=>{size();sim&&sim.alpha(.3).restart();});
+  sim=d3.forceSimulation()
+    .force('link',d3.forceLink().id(d=>d.id).distance(l=>(l.source.me||l.target.me)?70:46).strength(.25))
+    .force('charge',d3.forceManyBody().strength(-120))
+    .force('x',d3.forceX(0).strength(.055)).force('y',d3.forceY(0).strength(.065))
+    .force('collide',d3.forceCollide(d=>rad(d)+5))
+    .on('tick',draw);
+  d3.select(cv).call(d3.zoom().scaleExtent([.25,6]).on('zoom',e=>{tf=e.transform;draw();}))
+    .on('mousemove',onMove).on('click',onClick).on('mouseleave',()=>{hov=null;d3.select('#tip').style('opacity',0);draw();});
+}
+function size(){const r=document.getElementById('graph').getBoundingClientRect();
+  W=r.width;H=r.height;const dpr=window.devicePixelRatio||1;
+  cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+function rad(n){return n.me?13:3.4+Math.sqrt(n.deg)*2.1;}
+function apply(){
+  const vis=D.nodes.filter(visible);
+  const ids=new Set(vis.map(n=>n.id));
+  const prev=new Map(nodes.map(n=>[n.id,n]));
+  nodes=vis.map(n=>Object.assign(prev.get(n.id)||{},n));
+  links=D.links.filter(l=>ids.has(l.s)&&ids.has(l.t)).map(l=>({source:l.s,target:l.t}));
+  D.nodes.forEach(n=>{if(n.me)return;});
+  // tether every visible node to Nicholas so nothing floats off
+  nodes.filter(n=>!n.me).forEach(n=>links.push({source:'222397560',target:n.id,me:1}));
+  sim.nodes(nodes);sim.force('link').links(links);
+  sim.alpha(.85).restart();
+  d3.select('#graph .hint').text(`${nodes.length-1} shown · drag to pan · scroll to zoom · click a node`);
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);ctx.save();
+  ctx.translate(W/2+tf.x,H/2+tf.y);ctx.scale(tf.k,tf.k);
+  ctx.lineWidth=.7;
+  links.forEach(l=>{
+    if(l.me){ctx.strokeStyle='rgba(120,132,170,.085)';}
+    else{ctx.strokeStyle=sel&&(l.source.id===sel.id||l.target.id===sel.id)?'rgba(79,156,255,.75)':'rgba(120,132,170,.3)';}
+    ctx.beginPath();ctx.moveTo(l.source.x,l.source.y);ctx.lineTo(l.target.x,l.target.y);ctx.stroke();});
+  nodes.forEach(n=>{
+    const r=rad(n),c=colorOf(n),on=(sel&&sel.id===n.id)||(hov&&hov.id===n.id);
+    ctx.beginPath();ctx.arc(n.x,n.y,r,0,6.2832);
+    if(n.fb||n.me){ctx.fillStyle=c;ctx.globalAlpha=on?1:.92;ctx.fill();}
+    else{ctx.fillStyle='#0b0d14';ctx.globalAlpha=1;ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=1.4;ctx.stroke();}
+    ctx.globalAlpha=1;
+    if(on){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();}
+    if(n.ver&&!n.me){ctx.fillStyle='#0b0d14';ctx.beginPath();ctx.arc(n.x+r*.78,n.y-r*.78,2.2,0,6.2832);ctx.fill();
+      ctx.fillStyle='#4f9cff';ctx.beginPath();ctx.arc(n.x+r*.78,n.y-r*.78,1.5,0,6.2832);ctx.fill();}
+  });
+  const lim=nodes.length<60?1:(nodes.length<160?2:(nodes.length<340?3:4));
+  ctx.textAlign='center';ctx.textBaseline='top';
+  nodes.forEach(n=>{
+    const on=(sel&&sel.id===n.id)||(hov&&hov.id===n.id);
+    if(!on&&!n.me&&n.deg<lim)return;
+    ctx.font=`${n.me?700:600} ${(n.me?12:10.5)/Math.max(1,tf.k*.62)}px -apple-system,Segoe UI,sans-serif`;
+    ctx.fillStyle=n.me?'#fff':(on?'#fff':'rgba(200,209,230,.72)');
+    ctx.fillText(n.me?'Nicholas':'@'+n.un,n.x,n.y+rad(n)+3);});
+  ctx.restore();
+}
+function pick(e){const[mx,my]=d3.pointer(e,cv);
+  const x=(mx-W/2-tf.x)/tf.k,y=(my-H/2-tf.y)/tf.k;
+  let best=null,bd=1e9;nodes.forEach(n=>{const d=Math.hypot(n.x-x,n.y-y);if(d<bd&&d<rad(n)+6){bd=d;best=n;}});return best;}
+function onMove(e){const n=pick(e);hov=n;const t=d3.select('#tip');
+  if(n){t.style('opacity',1).style('left',(e.clientX+14)+'px').style('top',(e.clientY+14)+'px')
+    .html(`<div class="u">${n.me?'Nicholas Halka':'@'+n.un}</div><div class="m">${n.me?'@nnickkh':
+    [(n.full||''),n.fb?'follows back':'does not follow back',n.yr?'since '+n.yr:''].filter(Boolean).join(' · ')}</div>`);
+    cv.style.cursor='pointer';}
+  else{t.style('opacity',0);cv.style.cursor='grab';}
+  draw();}
+function onClick(e){const n=pick(e);sel=n&&!n.me?n:null;detail(sel);draw();}
+function detail(n){
+  const el=d3.select('#detail');
+  if(!n){el.html('<h3>Selected</h3><div class="empty">Click any node.</div>');return;}
+  const c=D.communities.find(c=>c.c===n.c);
+  el.html(`<h3>Selected</h3><div class="big">@${n.un}${n.ver?' ✓':''}</div>
+  <div class="fn">${n.full||'—'}</div>
+  <dl><dt>Follows back</dt><dd>${n.fb?'yes':'no'}</dd>
+  <dt>Since</dt><dd>${n.ts?new Date(n.ts*1e3).toLocaleDateString('en',{month:'short',year:'numeric'}):'—'}</dd>
+  <dt>Circle</dt><dd>${c?c.lead:'unmapped'}</dd>
+  <dt>Followed by</dt><dd>${n.deg} here</dd></dl>
+  <a class="go" href="https://instagram.com/${n.un}" target="_blank" rel="noopener">Open profile →</a>`);
+}
+</script>
+</body></html>
